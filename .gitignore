@@ -1,0 +1,32 @@
+# myenv/*
+lab/myenv/*
+lab/*.pyc
+# Pythonバイトコード無視
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+.env
+flutter/*
+flutterApp/my_app/env.dart
+**/*.lock
+
+lambda/package/*
+lambda/route_replay_lambda/*
+!lambda/route_replay_lambda/lambda_function.py
+
+# terraform
+*.backup
+**/*.tfstate
+*.tfstate
+*.tfstate.backup
+**/*.tfstate
+**/*.tfstate.backup
+.terraform/
+
+**/*.zip
+lambda/bus_locations/select_pu_bus/python/*
+!lambda/bus_locations/select_pu_bus/python/lambda_function.py
+!lambda/bus_locations/select_pu_bus/python/get_buses_info.py
+!lambda/bus_locations/select_pu_bus/python/douglas_peucker.py
