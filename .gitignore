@@ -30,3 +30,5 @@ lambda/bus_locations/select_pu_bus/python/*
 !lambda/bus_locations/select_pu_bus/python/lambda_function.py
 !lambda/bus_locations/select_pu_bus/python/get_buses_info.py
 !lambda/bus_locations/select_pu_bus/python/douglas_peucker.py
+
+.vscode/

@@ -54,9 +54,12 @@ def lambda_handler(event, context):
         )
 
         other_user_requests = get_other_user_requests()
-        buses_info_map = get_buses_info.buses_info(
-            other_user_requests, event, apploxDurationMin
-        )
+        # buses_info_map = get_buses_info.buses_info(
+        #     other_user_requests, event, apploxDurationMin
+        # )
+        print("other_user_requests:", other_user_requests)
+
+        buses_info_map = get_buses_info.buses_info(other_user_requests, event)
         print("buses_info_map:", buses_info_map)
 
         other_routes = []

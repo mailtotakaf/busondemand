@@ -1,4 +1,14 @@
 # on-demand bus app and API
+This application aims that
+Not only package software but just any services.
+
+In customers perspective,
+You don't need to own it but just only use it!
+
+
+
+
+# For developers:
 ## Flutter User application.
 ```dart
 flutter run -d chrome

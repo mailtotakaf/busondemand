@@ -48,6 +48,97 @@ class _RequestScreenState extends State<RequestScreen> {
 
   Map<String, dynamic> _busesInfoMap = {};
 
+  Widget _buildRouteCard(
+    String title,
+    Color color,
+    String departure,
+    String arrival,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(departure),
+                    Text(arrival),
+                    const SizedBox(height: 8),
+                    Text("乗車人数: $_passengerCount 名"),
+                    Text("車椅子での乗車: ${_wheelchair ? "あり" : "なし"}"),
+                    if (_wheelchair) Text("車椅子の台数: $_wheelchairCount 台"),
+                    if (_requests.isNotEmpty) Text("その他ご要望: $_requests"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('確認'),
+                        content: const Text('この条件で予約してもよろしいですか？'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(false);
+                            },
+                            child: const Text('キャンセル'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
+                            },
+                            child: const Text('予約する'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (result == true) {
+                    _confirmRoute();
+                  }
+                },
+                child: const Text('この条件で予約する'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _moveToCurrentLocation() async {
     try {
       LocationPermission permission = await Geolocator.requestPermission();
@@ -128,6 +219,13 @@ class _RequestScreenState extends State<RequestScreen> {
     super.dispose();
   }
 
+  String formatTime(String? timeStr, {String prefix = ''}) {
+    final pickupTime = DateTime.tryParse(timeStr ?? '');
+    return pickupTime != null
+        ? "$prefix${DateFormat('M月d日（EEE）H時mm分', 'ja').format(pickupTime)}頃"
+        : "$prefix不明";
+  }
+
   @override
   Widget build(BuildContext context) {
     String departureText = "出発予定時間：未設定";
@@ -136,43 +234,35 @@ class _RequestScreenState extends State<RequestScreen> {
     String recomendArrivalText = "到着予定時間：未設定";
 
     if (_busesInfoMap.isNotEmpty) {
+      final earlierInfo = _busesInfoMap['earlier'];
+      final ontimeInfo = _busesInfoMap['on_time'];
+
       if (_selectedType == "departure") {
-        departureText =
-            "出発予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(_requestDateTime!)}頃";
-        final arrivalDateTime = _requestDateTime!.add(
-          Duration(minutes: apploxDurationMin),
-        );
-        pickupTime = DateFormat(
-          'yyyy-MM-dd HH:mm:ss',
-        ).format(_requestDateTime!);
-        dropoffTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(arrivalDateTime);
-        arrivalText =
-            "到着予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(arrivalDateTime)}頃";
+        // departureText =
+        //     "出発予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(_requestDateTime!)}頃";
+        // final arrivalDateTime = _requestDateTime!.add(
+        //   Duration(minutes: apploxDurationMin),
+        // );
+        // pickupTime = DateFormat(
+        //   'yyyy-MM-dd HH:mm:ss',
+        // ).format(_requestDateTime!);
+        // dropoffTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(arrivalDateTime);
+        // arrivalText =
+        //     "到着予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(arrivalDateTime)}頃";
       } else {
-        final departureDateTime = _requestDateTime!.subtract(
-          Duration(minutes: apploxDurationMin),
-        );
-        pickupTime = DateFormat(
-          'yyyy-MM-dd HH:mm:ss',
-        ).format(departureDateTime);
-        dropoffTime = DateFormat(
-          'yyyy-MM-dd HH:mm:ss',
-        ).format(_requestDateTime!);
-        departureText =
-            "出発予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(departureDateTime)}頃";
-        arrivalText =
-            "到着予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(_requestDateTime!)}頃";
-        recomendDeptText =
-            "出発予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(departureDateTime)}頃";
-        recomendArrivalText =
-            "到着予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(_requestDateTime!)}頃";
+        departureText = formatTime(ontimeInfo?['pickupTime']);
+        arrivalText = formatTime(ontimeInfo?['dropoffTime']);
+        recomendDeptText = formatTime(earlierInfo?['pickupTime']);
+        recomendArrivalText = formatTime(earlierInfo?['dropoffTime']);
       }
     }
+
     return Scaffold(
       appBar: AppBar(title: Text('Sample')),
       body: Column(
         children: [
-          Expanded(
+          SizedBox(
+            height: 300,
             child: Stack(
               children: [
                 MapView(
@@ -196,242 +286,62 @@ class _RequestScreenState extends State<RequestScreen> {
               ],
             ),
           ),
-          AddressInput(
-            pickupController: _pickupAddressController,
-            dropoffController: _dropoffAddressController,
-            pickupLabel: _pickupAddress,
-            dropoffLabel: _dropoffAddress,
-            onPickupSearch: (text) => _searchAddressJP(text, isPickup: true),
-            onDropoffSearch: (text) => _searchAddressJP(text, isPickup: false),
-          ),
-
-          Padding(padding: const EdgeInsets.symmetric(vertical: 8.0)),
-          if (_busesInfoMap.isNotEmpty)
-            Padding(
+          Expanded(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                width: 3500,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 左側に緑の「指定した条件」
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'もっと早いルート条件',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        // 右側に元の情報
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(recomendDeptText),
-                              Text(recomendArrivalText),
-                              SizedBox(height: 8),
-                              Text("乗車人数: $_passengerCount 名"),
-                              Text("車椅子での乗車: ${_wheelchair ? "あり" : "なし"}"),
-                              if (_wheelchair)
-                                Text("車椅子の台数: $_wheelchairCount 台"),
-                              if (_requests.isNotEmpty)
-                                Text("その他ご要望: $_requests"),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                    // 右下にボタン
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('確認'),
-                                  content: const Text('この条件で予約してもよろしいですか？'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(
-                                          context,
-                                        ).pop(false); // キャンセル時
-                                      },
-                                      child: const Text('キャンセル'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(
-                                          context,
-                                        ).pop(true); // 予約する時
-                                      },
-                                      child: const Text('予約する'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-
-                            if (result == true) {
-                              _confirmRoute(); // 「予約する」を押したら本処理
-                            }
-                          },
-                          child: const Text('この条件で予約する'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ), // ここまで指定した条件
-          Padding(padding: const EdgeInsets.symmetric(vertical: 8.0)),
-          if (_busesInfoMap.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                width: 3500,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 左側に緑の「指定した条件」
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            '指定した条件',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        // 右側に元の情報
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(departureText),
-                              Text(arrivalText),
-                              SizedBox(height: 8),
-                              Text("乗車人数: $_passengerCount 名"),
-                              Text("車椅子での乗車: ${_wheelchair ? "あり" : "なし"}"),
-                              if (_wheelchair)
-                                Text("車椅子の台数: $_wheelchairCount 台"),
-                              if (_requests.isNotEmpty)
-                                Text("その他ご要望: $_requests"),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                    // 右下にボタン
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            final result = await showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('確認'),
-                                  content: const Text('この条件で予約してもよろしいですか？'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(
-                                          context,
-                                        ).pop(false); // キャンセル時
-                                      },
-                                      child: const Text('キャンセル'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(
-                                          context,
-                                        ).pop(true); // 予約する時
-                                      },
-                                      child: const Text('予約する'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-
-                            if (result == true) {
-                              _confirmRoute(); // 「予約する」を押したら本処理
-                            }
-                          },
-                          child: const Text('この条件で予約する'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ), // ここまで指定した条件
-          if (_busesInfoMap.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _busesInfoMap.clear();
-                    _simplifiedRoute.clear();
-                    _otherRoutePoints.clear();
-                    pickupTime = "";
-                    dropoffTime = "";
-                    // 必要に応じて他のリセットもここに書く
-                  });
-                },
-                icon: Icon(Icons.cancel),
-                label: Text('条件をキャンセルする'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+              child: Column(
+                children: [
+                  AddressInput(
+                    pickupController: _pickupAddressController,
+                    dropoffController: _dropoffAddressController,
+                    pickupLabel: _pickupAddress,
+                    dropoffLabel: _dropoffAddress,
+                    onPickupSearch:
+                        (text) => _searchAddressJP(text, isPickup: true),
+                    onDropoffSearch:
+                        (text) => _searchAddressJP(text, isPickup: false),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  if (_busesInfoMap.isNotEmpty) ...[
+                    _buildRouteCard(
+                      'もっと早い時間',
+                      Colors.blue,
+                      "出発： $recomendDeptText",
+                      "到着： $recomendArrivalText",
+                    ),
+                    const SizedBox(height: 8),
+                    _buildRouteCard(
+                      '指定した時間',
+                      Colors.green,
+                      "出発： $departureText",
+                      "到着： $arrivalText",
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _busesInfoMap.clear();
+                          _simplifiedRoute.clear();
+                          _otherRoutePoints.clear();
+                          pickupTime = "";
+                          dropoffTime = "";
+                        });
+                      },
+                      icon: Icon(Icons.cancel),
+                      label: Text('条件をキャンセルする'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
+          ),
         ],
       ),
     );

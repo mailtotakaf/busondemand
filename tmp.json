@@ -1,0 +1,7 @@
+{earlier: {busId: bus_002, pickupTime: 2025-05-28 23: 08, dropoffTime: 2025-05-28 23: 09
+    }, 
+    on_time: {busId: bus_002, pickupTime: 2025-05-31 12: 56, dropoffTime: 2025-05-31 12: 58
+    }, 
+    next_available: {anytime: true
+    }
+}

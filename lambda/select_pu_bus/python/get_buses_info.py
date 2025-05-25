@@ -6,6 +6,12 @@ import requests
 from datetime import datetime, timedelta
 from douglas_peucker import douglas_peucker
 from math import radians, cos, sin, asin, sqrt
+from typing import List, Dict, Any
+import math
+import re
+from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import List, Dict, Any, Optional
 
 ORS_API_KEY = os.environ["ORS_API_KEY"]
 dynamodb = boto3.resource("dynamodb")
@@ -98,120 +104,170 @@ def estimate_boarding_and_dropoff_point(bus, user_pickup, user_dropoff):
     }
 
 
-# 距離[m]をkm/h速度で移動したと仮定し、必要な時間（分）を返す
-def estimate_travel_time_min(lat1, lon1, lat2, lon2, speed_kmh=20):
-    # print("estimate_travel_time_min start.")
-    # 1度 ≒ 111km として近似（大阪周辺ならまあまあOK）
-    dx = (lon1 - lon2) * 111000 * math.cos(math.radians((lat1 + lat2) / 2))
-    dy = (lat1 - lat2) * 111000
-    # distance_m = math.sqrt(dx**2 + dy**2) # 直線距離[m]
-    distance_m = dx + dy  # 直角に移動した場合の距離[m]
-    speed_mps = speed_kmh * 1000 / 3600  # m/s
-    # print("estimate_travel_time_min end.")
-    return distance_m / 60 / speed_mps  # 分
+# def estimate_travel_time_min(lat1, lon1, lat2, lon2, speed_kmh=20):
+#     dx = (lon1 - lon2) * 111000 * math.cos(math.radians((lat1 + lat2) / 2))
+#     dy = (lat1 - lat2) * 111000
+#     distance_m = abs(dx) + abs(dy)
+#     speed_mps = speed_kmh * 1000 / 3600
+#     return distance_m / 60 / speed_mps
 
 
-def buses_info(buses, userRequest, apploxDurationMin):
-    MAX_CAPACITY = 6
-    print("userRequest:", userRequest)
+def _fmt(info):
+    return {
+        "arrival_from": info["arrival_from"].strftime("%Y-%m-%d %H:%M:%S"),
+        "until": info["until"].strftime("%Y-%m-%d %H:%M:%S"),
+    }
 
-    req_dt = datetime.strptime(userRequest["requestDateTime"], "%Y-%m-%d %H:%M")
-    selected_type = userRequest["selectedType"]
-    requested_passengers = userRequest["passengerCount"]
 
-    req_pu_dt = req_dt - timedelta(minutes=apploxDurationMin)
-    print("req_pu_dt:", req_pu_dt)
+def parse_time(time_str: str) -> datetime:
+    return datetime.strptime(time_str.strip(), "%Y-%m-%d %H:%M")
 
-    # バスIDをキーにして、apploxDurationMin, simplified_routeをMapに格納
-    buses_info_map = {}
+
+# ここから
+# ────────────────────────────── 便利関数 ──────────────────────────────
+_DT_FMT_OUT = "%Y-%m-%d %H:%M"
+_SPEED_KMH = 20  # 平均走行速度
+_RELOC_BUFFER_MIN = 10  # 追加で取る余裕（min）…必要なら調整してください
+
+
+def _parse_dt(txt: str) -> datetime:
+    """秒欠落や余計な空白を吸収して datetime へ。"""
+    txt = re.sub(r"\s{2,}", " ", txt.strip())
+    txt = re.sub(r":\s+", ":", txt)
+    if len(txt) == 16:
+        txt += ":00"
+    return datetime.strptime(txt, "%Y-%m-%d %H:%M:%S")
+
+
+def _to_f(val):
+    return float(val) if isinstance(val, Decimal) else val
+
+
+def travel_min(lat1, lon1, lat2, lon2, speed=_SPEED_KMH) -> float:
+    dx = (lon1 - lon2) * 111_000 * math.cos(math.radians((lat1 + lat2) / 2))
+    dy = (lat1 - lat2) * 111_000
+    dist = abs(dx) + abs(dy)
+    speed_m_per_min = speed * 1000 / 60  # ← ここがポイント
+    return dist / speed_m_per_min  # **分** で返す
+
+
+# ────────────────────────────── メイン ──────────────────────────────
+def buses_info(buses: List[Dict[str, Any]], user_req: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    返却例:
+    {
+        'earlier': {'anytime': True},
+        'on_time': {'busId': 'bus_003', 'pickupTime': '...', 'dropoffTime': '...'},
+        'next_available': {'until': '...'} | {'anytime': True} | None
+    }
+    """
+    # ── 新規依頼 ─────────────────────────────
+    req_drop = _parse_dt(user_req["requestDateTime"])
+    pu_lon, pu_lat = user_req["pickup"]
+    do_lon, do_lat = user_req["dropoff"]
+
+    pu2do_min = travel_min(pu_lat, pu_lon, do_lat, do_lon)
+    latest_pick = req_drop - timedelta(minutes=pu2do_min)
+
+    # バスごとに「直前ジョブ」「直後ジョブ」を抽出（無ければ None）
+    candidates = []
     for bus in buses:
-        print("=====================================bus:", bus)
+        job_pick = _parse_dt(bus["pickupTime"])
+        job_drop = _parse_dt(bus["dropoffTime"])
 
-        dropoff_dt = datetime.strptime(
-            bus["dropoffTime"], "%Y-%m-%d %H:%M:%S"
-        )
+        # 直前／直後の区分
+        prev_job = None
+        next_job = None
+        if job_drop <= latest_pick:
+            prev_job = bus  # ジョブ全体が前に終わる
+        elif job_pick >= req_drop:
+            next_job = bus  # ジョブ全体が後に控える
+        else:
+            # 依頼と重なるジョブがある場合は今回は対象外
+            continue
 
-        # print("dropoff_dt:", dropoff_dt)
-        # bus["dropoff"]場所からuserRequest["pickup"]場所までの時間
-        arrival_min = estimate_travel_time_min(
-            float(bus["dropoff"]["latitude"]),
-            float(bus["dropoff"]["longitude"]),
-            float(userRequest["pickup"][1]),
-            float(userRequest["pickup"][0]),
-            20,
-        )
+        # 前ジョブ終了地点 → 新規ピック地点
+        if prev_job:
+            prev_do_lat = _to_f(prev_job["dropoff"]["latitude"])
+            prev_do_lon = _to_f(prev_job["dropoff"]["longitude"])
+            prev_do_dt = _parse_dt(prev_job["dropoffTime"])
+            to_pick_min = travel_min(prev_do_lat, prev_do_lon, pu_lat, pu_lon)
+            earliest_pick = prev_do_dt + timedelta(minutes=to_pick_min)
+        else:
+            earliest_pick = datetime.min  # いつでも行ける
 
-        arrival_from = dropoff_dt + timedelta(minutes=arrival_min)
-        until = arrival_from + timedelta(minutes=apploxDurationMin)
-        same_bus_info_map = buses_info_map.get(bus["busId"])
-        # print("same_bus_info_map:", same_bus_info_map)
-        # if same_bus_info_map is not None:
-        #     print("same_bus_info_map.get(arrival_from):", same_bus_info_map.get("arrival_from"))
-        # print("arrival_from:", arrival_from)
-        if same_bus_info_map:
-            print("おなじbusId:", bus["busId"])
-            if same_bus_info_map.get("arrival_from") < arrival_from:
-                print("このarrival_fromのほうが遅い：")
-                print("このbus[pickup]時間に間に合うか")
-                pickup_dt = datetime.strptime(
-                    bus["pickupTime"], "%Y-%m-%d %H:%M:%S"
-                )
-                if pickup_dt > same_bus_info_map.get("until"):
-                    print("間に合うので、buses_info_map更新なし。スキップします。")
-                    continue
-                else:
-                    print("間に合わないのでbuses_info_mapから削除")
-                    del buses_info_map[bus["busId"]]
-                    print("削除しました。:", bus["busId"])
-            else:
-                print("このarrival_fromのほうが早い：")
-                print(
-                    "ここに差し込んだ場合に、元のbuses_info_mapにあった予定に間に合うか"
-                )
-                base_pickup = same_bus_info_map.get("base_pickup")
-                # print("base_pickup:", base_pickup)
-                until_to_base_pu = estimate_travel_time_min(
-                    float(bus["dropoff"]["latitude"]),
-                    float(bus["dropoff"]["longitude"]),
-                    float(base_pickup["latitude"]),
-                    float(base_pickup["longitude"]),
-                    20,
-                )
-                base_pickup_time = datetime.strptime(
-                    base_pickup.get("pickupTime"), "%Y-%m-%d %H:%M:%S"
-                )
-                print("base_pickup_time", base_pickup_time)
-                # print("until_to_base_pu:", until_to_base_pu)
-                print("until + timedelta(minutes=until_to_base_pu:", until + timedelta(minutes=until_to_base_pu))
-                if base_pickup_time < (until + timedelta(minutes=until_to_base_pu)):
-                    print(
-                        "base_pickupに間に合わないので、buses_info_map更新なし。スキップします。"
-                    )
-                    continue
-
-        if req_pu_dt > arrival_from:
-            print(
-                "bus[dropoff]時間後にリクエストpu時間に間に合う：buses_info_map更新します。"
+        # 新規ドロップ → 次ジョブのピック地点
+        if next_job:
+            next_pi_lat = _to_f(next_job["pickup"]["latitude"])
+            next_pi_lon = _to_f(next_job["pickup"]["longitude"])
+            next_pi_dt = _parse_dt(next_job["pickupTime"])
+            do_to_next_min = travel_min(do_lat, do_lon, next_pi_lat, next_pi_lon)
+            latest_drop = next_pi_dt - timedelta(
+                minutes=do_to_next_min + _RELOC_BUFFER_MIN
             )
-            buses_info_map[bus["busId"]] = {
-                "base_pickup": bus[
-                    "pickup"
-                ],  # このpickupに間に合わない場合はbuses_info_map更新禁止！
-                "arrival_from": arrival_from,
-                "until": until,
+        else:
+            latest_drop = datetime.max  # その後も空き
+
+        candidates.append(
+            {
+                "busId": bus["busId"],
+                "earliest_pick": earliest_pick,
+                "latest_drop": latest_drop,
             }
-            print("buses_info_map更新しました。busId：", bus["busId"])
+        )
 
-    # "base_pickup" は不要なので消す
-    for bus_id in buses_info_map:
-        buses_info_map[bus_id].pop("base_pickup", None)
+    # ── 分類 ─────────────────────────────
+    earlier: Optional[Dict[str, Any]] = None
+    on_time: Optional[Dict[str, Any]] = None
+    next_available: Optional[Dict[str, Any]] = None
 
-    # strftime()でstrに変換する
-    for bus_id, info in buses_info_map.items():
-        info["arrival_from"] = info["arrival_from"].strftime("%Y-%m-%d %H:%M:%S")
-        info["until"] = info["until"].strftime("%Y-%m-%d %H:%M:%S")
+    # 1) on-time をまず確保（最短距離のバス）
+    on_pool = [
+        c
+        for c in candidates
+        if c["earliest_pick"] <= latest_pick and req_drop <= c["latest_drop"]
+    ]
+    if on_pool:
+        on_choice = min(on_pool, key=lambda c: c["earliest_pick"])
+        on_time = {
+            "busId": on_choice["busId"],
+            "pickupTime": latest_pick.strftime(_DT_FMT_OUT),
+            "dropoffTime": req_drop.strftime(_DT_FMT_OUT),
+        }
 
-    return buses_info_map
+    # 2) earlier:
+    if any(c["earliest_pick"] == datetime.min for c in candidates):
+        earlier = {"anytime": True}
+    else:
+        earlier_pool = [c for c in candidates if c["earliest_pick"] < latest_pick]
+        if earlier_pool:
+            e = min(earlier_pool, key=lambda c: c["earliest_pick"])
+            earlier = {
+                "busId": e["busId"],
+                "pickupTime": e["earliest_pick"].strftime(_DT_FMT_OUT),
+                "dropoffTime": (
+                    e["earliest_pick"] + timedelta(minutes=pu2do_min)
+                ).strftime(_DT_FMT_OUT),
+            }
+
+    # 3) next_available:
+    remaining = [c for c in candidates if not on_time or c["busId"] != on_time["busId"]]
+    if remaining:
+        # 締切が最も早いバス
+        nxt = min(remaining, key=lambda c: c["latest_drop"])
+        if nxt["latest_drop"] != datetime.max:
+            next_available = {"until": nxt["latest_drop"].strftime(_DT_FMT_OUT)}
+        else:
+            next_available = {"anytime": True}
+
+    return {
+        "earlier": earlier,
+        "on_time": on_time,
+        "next_available": next_available,
+    }
+
+
+# ここまで
 
 
 def get_ors_info(pickup, dropoff):
