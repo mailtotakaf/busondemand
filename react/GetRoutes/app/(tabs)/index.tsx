@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button, View, Linking, FlatList, Text, StyleSheet, Switch, SafeAreaView } from 'react-native';
 import { useLocationSender } from '../../hooks/useLocationSender';
+import Constants from 'expo-constants';
+
+const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
 // データの型定義
 interface PickupLocation {
@@ -45,7 +48,7 @@ export default function Index() {
     errorMsg
   } = useLocationSender(
     busId,
-    'https://xk2l7ps1q9.execute-api.us-west-2.amazonaws.com/location',
+    POST_BUS_LOCATIONS_API_URL,
     false // アプリ起動時に自動で位置情報の送信を開始するかどうか
   );
 
