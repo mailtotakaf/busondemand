@@ -63,6 +63,7 @@ export const useLocationSender = (
         busId,
         latitude: loc.coords.latitude,
         longitude: loc.coords.longitude,
+        status: 'active', // TODO: 位置情報送信時のステータス
         timestamp: new Date().toISOString(),
       };
       await fetch(apiUrl, {
