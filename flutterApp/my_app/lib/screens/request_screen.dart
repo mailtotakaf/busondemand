@@ -43,16 +43,12 @@ class _RequestScreenState extends State<RequestScreen> {
   int _wheelchairCount = 1;
   String _selectedType = "";
   int apploxDurationMin = 0;
-  String pickupTime = "";
-  String dropoffTime = "";
+  // String pickupTime = "";
+  // String dropoffTime = "";
 
   Map<String, dynamic> _busesInfoMap = {};
 
-  Widget _buildRouteCard(
-    String title,
-    Color color,
-    busesInfo
-  ) {
+  Widget _buildRouteCard(String title, Color color, busesInfo) {
     String deptTimeText = formatTime(busesInfo?['pickupTime']);
     String arrivalTimeText = formatTime(busesInfo?['dropoffTime']);
     return Container(
@@ -128,7 +124,10 @@ class _RequestScreenState extends State<RequestScreen> {
                   );
 
                   if (result == true) {
-                    _confirmRoute();
+                    _confirmRoute(
+                      busesInfo?['pickupTime'],
+                      busesInfo?['dropoffTime'],
+                    );
                   }
                 },
                 child: const Text('この条件で予約する'),
@@ -278,13 +277,13 @@ class _RequestScreenState extends State<RequestScreen> {
                     _buildRouteCard(
                       'もっと早い時間',
                       Colors.blue,
-                      _busesInfoMap['earlier']
+                      _busesInfoMap['earlier'],
                     ),
                     const SizedBox(height: 8),
                     _buildRouteCard(
                       '指定した時間',
                       Colors.green,
-                      _busesInfoMap['on_time']
+                      _busesInfoMap['on_time'],
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
@@ -293,8 +292,8 @@ class _RequestScreenState extends State<RequestScreen> {
                           _busesInfoMap.clear();
                           _simplifiedRoute.clear();
                           _otherRoutePoints.clear();
-                          pickupTime = "";
-                          dropoffTime = "";
+                          // pickupTime = "";
+                          // dropoffTime = "";
                         });
                       },
                       icon: Icon(Icons.cancel),
@@ -392,7 +391,7 @@ class _RequestScreenState extends State<RequestScreen> {
     }
   }
 
-  void _confirmRoute() async {
+  void _confirmRoute(pickupTime, dropoffTime) async {
     if (_pickupLatLng == null || _userDropoffLatLng == null) {
       ScaffoldMessenger.of(
         context,
