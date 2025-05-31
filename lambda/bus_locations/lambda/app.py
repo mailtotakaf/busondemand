@@ -13,9 +13,7 @@ CORS_HEADERS = {
 
 
 def lambda_handler(event, context):
-    # print("🚍 Event received:", json.dumps(event))
-
-    method = event.get("requestContext", {}).get("http", {}).get("method")
+    method = event.get("requestContext", {}).get("http", {}).get("method", "")
 
     if method == "OPTIONS":
         return {
@@ -25,7 +23,9 @@ def lambda_handler(event, context):
         }
 
     try:
-        body = json.loads(event["body"])
+        body_str = event.get("body", "{}")
+        body = json.loads(body_str)
+
         print("body:", body)
         bus_id = body["busId"]
         latitude = body["latitude"]

@@ -45,7 +45,7 @@ export default function Index() {
     errorMsg
   } = useLocationSender(
     busId,
-    'https://y6ajbpn5wa.execute-api.us-west-2.amazonaws.com/location',
+    'https://xk2l7ps1q9.execute-api.us-west-2.amazonaws.com/location',
     false // アプリ起動時に自動で位置情報の送信を開始するかどうか
   );
 
