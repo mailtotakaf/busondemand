@@ -85,8 +85,8 @@ class _RequestScreenState extends State<RequestScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(departure),
-                    Text(arrival),
+                    Text("出発： $departure 頃"),
+                    Text("到着： $arrival 頃"),
                     const SizedBox(height: 8),
                     Text("乗車人数: $_passengerCount 名"),
                     Text("車椅子での乗車: ${_wheelchair ? "あり" : "なし"}"),
@@ -220,9 +220,9 @@ class _RequestScreenState extends State<RequestScreen> {
   }
 
   String formatTime(String? timeStr, {String prefix = ''}) {
-    final pickupTime = DateTime.tryParse(timeStr ?? '');
-    return pickupTime != null
-        ? "$prefix${DateFormat('M月d日（EEE）H時mm分', 'ja').format(pickupTime)}頃"
+    final formatTimeStr = DateTime.tryParse(timeStr ?? '');
+    return formatTimeStr != null
+        ? "$prefix${DateFormat('M月d日（EEE）H時mm分', 'ja').format(formatTimeStr)}"
         : "$prefix不明";
   }
 
@@ -306,15 +306,15 @@ class _RequestScreenState extends State<RequestScreen> {
                     _buildRouteCard(
                       'もっと早い時間',
                       Colors.blue,
-                      "出発： $recomendDeptText",
-                      "到着： $recomendArrivalText",
+                      recomendDeptText,
+                      recomendArrivalText,
                     ),
                     const SizedBox(height: 8),
                     _buildRouteCard(
                       '指定した時間',
                       Colors.green,
-                      "出発： $departureText",
-                      "到着： $arrivalText",
+                      departureText,
+                      arrivalText,
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
