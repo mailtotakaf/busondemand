@@ -51,9 +51,12 @@ class _RequestScreenState extends State<RequestScreen> {
   Widget _buildRouteCard(
     String title,
     Color color,
-    String departure,
-    String arrival,
+    // String departure,
+    // String arrival,
+    busesInfo
   ) {
+    String deptTimeText = formatTime(busesInfo?['pickupTime']);
+    String arrivalTimeText = formatTime(busesInfo?['dropoffTime']);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -85,8 +88,8 @@ class _RequestScreenState extends State<RequestScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("出発： $departure 頃"),
-                    Text("到着： $arrival 頃"),
+                    Text("出発： $deptTimeText 頃"),
+                    Text("到着： $arrivalTimeText 頃"),
                     const SizedBox(height: 8),
                     Text("乗車人数: $_passengerCount 名"),
                     Text("車椅子での乗車: ${_wheelchair ? "あり" : "なし"}"),
@@ -306,15 +309,17 @@ class _RequestScreenState extends State<RequestScreen> {
                     _buildRouteCard(
                       'もっと早い時間',
                       Colors.blue,
-                      recomendDeptText,
-                      recomendArrivalText,
+                      // recomendDeptText,
+                      // recomendArrivalText,
+                      _busesInfoMap['earlier']
                     ),
                     const SizedBox(height: 8),
                     _buildRouteCard(
                       '指定した時間',
                       Colors.green,
-                      departureText,
-                      arrivalText,
+                      // departureText,
+                      // arrivalText,
+                      _busesInfoMap['on_time']
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
@@ -445,15 +450,15 @@ class _RequestScreenState extends State<RequestScreen> {
       },
       "userId": "user121", // TODO:
       "busId": "bus_003", // TODO:
-      "simplified_route":
-          _simplifiedRoute
-              .map(
-                (latLng) => {
-                  "latitude": latLng.latitude,
-                  "longitude": latLng.longitude,
-                },
-              )
-              .toList(),
+      // "simplified_route":
+      //     _simplifiedRoute
+      //         .map(
+      //           (latLng) => {
+      //             "latitude": latLng.latitude,
+      //             "longitude": latLng.longitude,
+      //           },
+      //         )
+      //         .toList(),
       "selectedType": _selectedType,
       "passengerCount": _passengerCount,
       // "wheelchair": true, // TODO: 以下情報後回し
