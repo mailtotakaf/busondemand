@@ -51,8 +51,6 @@ class _RequestScreenState extends State<RequestScreen> {
   Widget _buildRouteCard(
     String title,
     Color color,
-    // String departure,
-    // String arrival,
     busesInfo
   ) {
     String deptTimeText = formatTime(busesInfo?['pickupTime']);
@@ -231,35 +229,6 @@ class _RequestScreenState extends State<RequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String departureText = "出発予定時間：未設定";
-    String arrivalText = "到着予定時間：未設定";
-    String recomendDeptText = "出発予定時間：未設定";
-    String recomendArrivalText = "到着予定時間：未設定";
-
-    if (_busesInfoMap.isNotEmpty) {
-      final earlierInfo = _busesInfoMap['earlier'];
-      final ontimeInfo = _busesInfoMap['on_time'];
-
-      if (_selectedType == "departure") {
-        // departureText =
-        //     "出発予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(_requestDateTime!)}頃";
-        // final arrivalDateTime = _requestDateTime!.add(
-        //   Duration(minutes: apploxDurationMin),
-        // );
-        // pickupTime = DateFormat(
-        //   'yyyy-MM-dd HH:mm:ss',
-        // ).format(_requestDateTime!);
-        // dropoffTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(arrivalDateTime);
-        // arrivalText =
-        //     "到着予定時間：${DateFormat('M月d日（EEE）H時mm分', 'ja').format(arrivalDateTime)}頃";
-      } else {
-        departureText = formatTime(ontimeInfo?['pickupTime']);
-        arrivalText = formatTime(ontimeInfo?['dropoffTime']);
-        recomendDeptText = formatTime(earlierInfo?['pickupTime']);
-        recomendArrivalText = formatTime(earlierInfo?['dropoffTime']);
-      }
-    }
-
     return Scaffold(
       appBar: AppBar(title: Text('Sample')),
       body: Column(
@@ -309,16 +278,12 @@ class _RequestScreenState extends State<RequestScreen> {
                     _buildRouteCard(
                       'もっと早い時間',
                       Colors.blue,
-                      // recomendDeptText,
-                      // recomendArrivalText,
                       _busesInfoMap['earlier']
                     ),
                     const SizedBox(height: 8),
                     _buildRouteCard(
                       '指定した時間',
                       Colors.green,
-                      // departureText,
-                      // arrivalText,
                       _busesInfoMap['on_time']
                     ),
                     const SizedBox(height: 8),
