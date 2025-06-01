@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Button, View, Linking, FlatList, Text, StyleSheet, Switch, SafeAreaView } from 'react-native';
-import { useLocationSender } from '../../hooks/useLocationSender';
+import { useLocationSender } from '../../../hooks/useLocationSender';
 import Constants from 'expo-constants';
+import { Ionicons } from '@expo/vector-icons';
+import { TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+
+// あなたのルート定義（任意名）
+type DrawerParamList = {
+  '(tabs)': undefined;
+  // 他に画面があれば追加
+};
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
@@ -34,6 +44,7 @@ interface RouteItem {
 export default function Index() {
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
 
   // バスID - 実際の環境に合わせて変更してください
   const busId = 'bus_003';
@@ -132,31 +143,34 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       {/* 位置情報送信コントロールエリア */}
       <View style={styles.locationControlArea}>
-        <View style={styles.switchContainer}>
-          <Text>位置情報送信: </Text>
-          <Switch
-            value={isTracking}
-            onValueChange={setIsTracking}
-            trackColor={{ false: '#767577', true: '#81b0ff' }}
-            thumbColor={isTracking ? '#f5dd4b' : '#f4f3f4'}
-          />
-          {/* 常にTextで囲む */}
-          <Text style={styles.locationStatus}>
-            {isTracking ? '送信中' : '停止中'}
-          </Text>
+        <View style={{ flex: 1 }}>
+          <View style={styles.switchContainer}>
+            <Text>位置情報送信: </Text>
+            <Switch
+              value={isTracking}
+              onValueChange={setIsTracking}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={isTracking ? '#f5dd4b' : '#f4f3f4'}
+            />
+            <Text style={styles.locationStatus}>
+              {isTracking ? '送信中' : '停止中'}
+            </Text>
+          </View>
+
+          {location?.coords && (
+            <Text style={styles.locationText}>
+              位置: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
+            </Text>
+          )}
+
+          {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
         </View>
 
-        {location?.coords && (
-          <Text style={styles.locationText}>
-            位置: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
-          </Text>
-        )}
-
-        {errorMsg && (
-          <Text style={styles.errorText}>{errorMsg}</Text>
-        )}
+        {/* ハンバーガーメニューボタン */}
+        <TouchableOpacity onPress={() => navigation.openDrawer?.()}>
+          <Ionicons name="menu-outline" size={28} />
+        </TouchableOpacity>
       </View>
-
       <Text style={styles.header}>{busId} リクエスト一覧</Text>
 
       {/* リクエスト一覧表示エリア */}
@@ -196,6 +210,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // padding: 10,
   },
   switchContainer: {
     flexDirection: 'row',
