@@ -8,6 +8,7 @@ export default function DrawerLayout() {
       screenOptions={{
         headerShown: true,
         drawerActiveTintColor: '#2196f3',
+        headerLeft: () => null, // ← これを追加
       }}
     >
       <Drawer.Screen
