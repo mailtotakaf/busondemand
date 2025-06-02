@@ -46,7 +46,7 @@ export default function Index() {
   const [busId, setBusId] = useState('bus_003');
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [locationStatus, setLocationStatus] = useState('avairable');
+  const [locationStatus, setLocationStatus] = useState('stop');
   const [time, setTime] = useState('08:00');
   const [quarter, setQuarter] = useState('00');
   const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
@@ -175,6 +175,7 @@ export default function Index() {
                 }}
                 style={{ width: 120, height: 40 }}
               >
+                <Picker.Item label="停止中" value="stop" />
                 <Picker.Item label="受付中" value="avairable" />
                 <Picker.Item label="休憩中" value="rest" />
                 <Picker.Item label="受付終了" value="stopped" />
