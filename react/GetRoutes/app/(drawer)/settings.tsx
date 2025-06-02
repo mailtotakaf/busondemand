@@ -31,50 +31,16 @@ export default function SettingsScreen() {
       {/* 左上に「設定画面」 */}
       <Text style={styles.screenTitle}>設定画面</Text>
 
-      {/* 以下は例：状態・時間・分のプルダウン */}
-      <Text style={styles.label}>状態</Text>
       <View style={styles.pickerWrapper}>
         <Picker
           selectedValue={status}
           onValueChange={(itemValue) => setStatus(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="受付中" value="available" />
-          <Picker.Item label="休憩中" value="break" />
-          <Picker.Item label="本日受付終了" value="finish" />
+          <Picker.Item label="bus_001" value="bus_001" />
+          <Picker.Item label="bus_002" value="bus_002" />
+          <Picker.Item label="bus_003" value="bus_003" />
         </Picker>
-      </View>
-      <View style={styles.row}>
-        <View style={[styles.pickerWrapper, { marginRight: 8 }]}>
-          <Picker
-            selectedValue={time}
-            onValueChange={(itemValue) => setTime(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="08:00" value="08:00" />
-            <Picker.Item label="09:00" value="09:00" />
-            <Picker.Item label="10:00" value="10:00" />
-            <Picker.Item label="11:00" value="11:00" />
-            <Picker.Item label="12:00" value="12:00" />
-            <Picker.Item label="13:00" value="13:00" />
-            <Picker.Item label="14:00" value="14:00" />
-            <Picker.Item label="15:00" value="15:00" />
-            <Picker.Item label="16:00" value="16:00" />
-            <Picker.Item label="17:00" value="17:00" />
-          </Picker>
-        </View>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={quarter}
-            onValueChange={(itemValue) => setQuarter(itemValue)}
-            style={styles.picker}
-          >
-            {quarterOptions.map((opt) => (
-              <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
-            ))}
-          </Picker>
-        </View>
-        <Text style={{ marginLeft: 8 }}>まで</Text>
       </View>
     </View>
   );
