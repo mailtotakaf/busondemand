@@ -60,12 +60,15 @@ export default function Index() {
     setIsTracking,
     location,
     lastSentTime,
-    status,
+    status: sendStatus,
     errorMsg
   } = useLocationSender(
     busId,
     POST_BUS_LOCATIONS_API_URL,
-    false // アプリ起動時に自動で位置情報の送信を開始するかどうか
+    false,
+    locationStatus, // ← 追加
+    time,           // ← 追加
+    quarter         // ← 追加
   );
 
   const fetchData = async () => {

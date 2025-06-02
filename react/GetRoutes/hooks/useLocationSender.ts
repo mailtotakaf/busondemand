@@ -2,12 +2,12 @@ import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
 
 export function useLocationSender(
-  busId: string,
-  apiUrl: string,
-  autoStart: boolean,
-  locationStatus: string, // 追加
-  time: string,           // 追加
-  quarter: string         // 追加
+  busId,
+  apiUrl,
+  autoStart,
+  status,   // ← 追加
+  time,     // ← 追加
+  quarter   // ← 追加
 ) {
   const [isTracking, setIsTracking] = useState(autoStart);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -60,7 +60,7 @@ export function useLocationSender(
     };
   }, [isTracking]);
 
-  const sendLocation = async (coords: Location.LocationObject['coords']) => {
+  const sendLocation = async (coords) => {
     try {
       await fetch(apiUrl, {
         method: 'POST',
@@ -69,9 +69,9 @@ export function useLocationSender(
           busId,
           latitude: coords.latitude,
           longitude: coords.longitude,
-          status: locationStatus, // 追加
-          time: time,             // 追加
-          quarter: quarter        // 追加
+          status,   // ← 追加
+          time,     // ← 追加
+          quarter   // ← 追加
         }),
       });
       setLastSentTime(new Date());
