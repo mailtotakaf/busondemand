@@ -147,29 +147,26 @@ export default function Index() {
       <View style={styles.locationControlArea}>
         <View style={{ flex: 1 }}>
           <View style={styles.switchContainer}>
-            <Text>位置情報送信: </Text>
             <View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 120 }}>
               <Picker
                 selectedValue={locationStatus}
                 onValueChange={(value) => {
                   setLocationStatus(value);
-                  setIsTracking(value === 'sending');
+                  setIsTracking(value === 'avairable');
                 }}
                 style={{ width: 120, height: 40 }}
               >
-                <Picker.Item label="送信中" value="sending" />
-                <Picker.Item label="停止中" value="stopped" />
+                <Picker.Item label="受付中" value="avairable" />
+                <Picker.Item label="休憩中" value="rest" />
+                <Picker.Item label="受付終了" value="stopped" />
               </Picker>
             </View>
+            {location?.coords && (
+              <Text style={[styles.locationText, { marginLeft: 12 }]}>
+                位置: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
+              </Text>
+            )}
           </View>
-          <Text style={styles.locationStatus}>
-            {locationStatus === 'sending' ? '送信中' : '停止中'}
-          </Text>
-          {location?.coords && (
-            <Text style={styles.locationText}>
-              位置: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
-            </Text>
-          )}
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
         </View>
 
