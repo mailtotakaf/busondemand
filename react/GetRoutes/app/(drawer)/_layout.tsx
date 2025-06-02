@@ -21,6 +21,15 @@ export default function DrawerLayout() {
           ),
         }}
       />
+      <Drawer.Screen
+        name="settings"
+        options={{
+          title: '設定',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Drawer>
   );
 }
