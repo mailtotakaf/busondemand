@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
 
 export default function SettingsScreen() {
   const [status, setStatus] = useState('online');
   const [time, setTime] = useState('08:00');
   const [quarter, setQuarter] = useState('00');
+  const navigation = useNavigation();
 
   // 15分単位の選択肢
   const quarterOptions = [
@@ -17,6 +20,14 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* ハンバーガーメニューボタン */}
+      <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => navigation.openDrawer?.()}
+      >
+        <Ionicons name="menu-outline" size={28} />
+      </TouchableOpacity>
+
       <Text style={styles.label}>状態</Text>
       <View style={styles.pickerWrapper}>
         <Picker
@@ -29,7 +40,6 @@ export default function SettingsScreen() {
           <Picker.Item label="本日受付終了" value="finish" />
         </Picker>
       </View>
-        <br/>
       <View style={styles.row}>
         <View style={[styles.pickerWrapper, { marginRight: 8 }]}>
           <Picker
@@ -59,7 +69,8 @@ export default function SettingsScreen() {
               <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
             ))}
           </Picker>
-        </View>&nbsp;まで
+        </View>
+        <Text style={{ marginLeft: 8 }}>まで</Text>
       </View>
     </View>
   );
@@ -70,5 +81,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 18, marginBottom: 8 },
   pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 100 },
   picker: { width: 100, height: 44 },
-  row: { flexDirection: 'row', alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', marginTop: 24 },
+  menuButton: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
 });

@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { Picker } from '@react-native-picker/picker';
 
 // あなたのルート定義（任意名）
 type DrawerParamList = {
@@ -44,6 +45,7 @@ interface RouteItem {
 export default function Index() {
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [locationStatus, setLocationStatus] = useState('stopped');
   const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
 
   // バスID - 実際の環境に合わせて変更してください
@@ -146,23 +148,28 @@ export default function Index() {
         <View style={{ flex: 1 }}>
           <View style={styles.switchContainer}>
             <Text>位置情報送信: </Text>
-            <Switch
-              value={isTracking}
-              onValueChange={setIsTracking}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={isTracking ? '#f5dd4b' : '#f4f3f4'}
-            />
-            <Text style={styles.locationStatus}>
-              {isTracking ? '送信中' : '停止中'}
-            </Text>
+            <View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 120 }}>
+              <Picker
+                selectedValue={locationStatus}
+                onValueChange={(value) => {
+                  setLocationStatus(value);
+                  setIsTracking(value === 'sending');
+                }}
+                style={{ width: 120, height: 40 }}
+              >
+                <Picker.Item label="送信中" value="sending" />
+                <Picker.Item label="停止中" value="stopped" />
+              </Picker>
+            </View>
           </View>
-
+          <Text style={styles.locationStatus}>
+            {locationStatus === 'sending' ? '送信中' : '停止中'}
+          </Text>
           {location?.coords && (
             <Text style={styles.locationText}>
               位置: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
             </Text>
           )}
-
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
         </View>
 
