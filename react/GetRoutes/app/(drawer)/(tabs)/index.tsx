@@ -161,9 +161,9 @@ export default function Index() {
                 <Picker.Item label="受付終了" value="stopped" />
               </Picker>
             </View>
-            {location?.coords && (
+            {locationStatus === 'avairable' && location?.coords && (
               <Text style={[styles.locationText, { marginLeft: 12 }]}>
-                位置: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
+                位置送信中: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
               </Text>
             )}
           </View>
