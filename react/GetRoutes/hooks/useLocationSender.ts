@@ -5,9 +5,9 @@ export function useLocationSender(
   busId,
   apiUrl,
   autoStart,
-  status,   // ← 追加
-  time,     // ← 追加
-  quarter   // ← 追加
+  status,
+  time,
+  quarter
 ) {
   const [isTracking, setIsTracking] = useState(autoStart);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -60,6 +60,14 @@ export function useLocationSender(
     };
   }, [isTracking]);
 
+  // untilを生成
+  const getUntil = () => {
+    if (!time || !quarter) return '';
+    const [h, m] = time.split(':').map(Number);
+    const untilMinute = String(Number(quarter)).padStart(2, '0');
+    return `${String(h).padStart(2, '0')}:${untilMinute}`;
+  };
+
   const sendLocation = async (coords) => {
     try {
       await fetch(apiUrl, {
@@ -69,9 +77,8 @@ export function useLocationSender(
           busId,
           latitude: coords.latitude,
           longitude: coords.longitude,
-          status,   // ← 追加
-          time,     // ← 追加
-          quarter   // ← 追加
+          status,
+          until: getUntil(), // ← ここだけ送信
         }),
       });
       setLastSentTime(new Date());
