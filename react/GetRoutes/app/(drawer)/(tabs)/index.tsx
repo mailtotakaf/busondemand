@@ -160,6 +160,8 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* バスIDを左上に表示 */}
+      <Text style={styles.busIdLabel}>{busId}</Text>
       {/* 位置情報送信コントロールエリア */}
       <View style={styles.locationControlArea}>
         <View style={{ flex: 1 }}>
@@ -228,7 +230,7 @@ export default function Index() {
           <Ionicons name="menu-outline" size={28} />
         </TouchableOpacity>
       </View>
-      <Text style={styles.header}>{busId} リクエスト一覧</Text>
+      <Text style={styles.header}>リクエスト一覧</Text>
 
       {/* リクエスト一覧表示エリア */}
       {loading ? (
@@ -364,4 +366,12 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 100 },
   picker: { width: 100, height: 44 },
+  busIdLabel: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    fontSize: 18,
+    fontWeight: 'bold',
+    zIndex: 10,
+  },
 });
