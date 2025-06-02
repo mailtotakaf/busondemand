@@ -45,7 +45,9 @@ interface RouteItem {
 export default function Index() {
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [locationStatus, setLocationStatus] = useState('stopped');
+  const [locationStatus, setLocationStatus] = useState('avairable');
+  const [time, setTime] = useState('08:00');
+  const [quarter, setQuarter] = useState('00');
   const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
 
   // バスID - 実際の環境に合わせて変更してください
@@ -141,6 +143,14 @@ export default function Index() {
     </View>
   );
 
+  // 15分単位の選択肢
+  const quarterOptions = [
+    { label: '00分', value: '00' },
+    { label: '15分', value: '15' },
+    { label: '30分', value: '30' },
+    { label: '45分', value: '45' },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       {/* 位置情報送信コントロールエリア */}
@@ -163,10 +173,46 @@ export default function Index() {
             </View>
             {locationStatus === 'avairable' && location?.coords && (
               <Text style={[styles.locationText, { marginLeft: 12 }]}>
-                位置送信中: {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
+                位置送信中： {location.coords.latitude.toFixed(5)}, {location.coords.longitude.toFixed(5)}
               </Text>
             )}
           </View>
+          {(locationStatus === 'avairable' || locationStatus === 'rest') && (
+            <View style={[styles.row, { marginTop: 16 }]}>
+              <View style={[styles.pickerWrapper, { marginRight: 8 }]}>
+                <Picker
+                  selectedValue={time}
+                  onValueChange={(itemValue) => setTime(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="08:00" value="08:00" />
+                  <Picker.Item label="09:00" value="09:00" />
+                  <Picker.Item label="10:00" value="10:00" />
+                  <Picker.Item label="11:00" value="11:00" />
+                  <Picker.Item label="12:00" value="12:00" />
+                  <Picker.Item label="13:00" value="13:00" />
+                  <Picker.Item label="14:00" value="14:00" />
+                  <Picker.Item label="15:00" value="15:00" />
+                  <Picker.Item label="16:00" value="16:00" />
+                  <Picker.Item label="17:00" value="17:00" />
+                  <Picker.Item label="18:00" value="18:00" />
+                  <Picker.Item label="19:00" value="19:00" />
+                  <Picker.Item label="20:00" value="20:00" />
+                </Picker>
+              </View>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  selectedValue={quarter}
+                  onValueChange={(itemValue) => setQuarter(itemValue)}
+                  style={styles.picker}
+                >
+                  {quarterOptions.map((opt) => (
+                    <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+                  ))}
+                </Picker>
+              </View>&nbsp;まで
+            </View>
+          )}
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
         </View>
 
@@ -307,5 +353,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#333', // 線の色
     borderBottomWidth: 1,      // 線の太さ
     marginVertical: 8,         // 上下の余白
-  }
+  },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 100 },
+  picker: { width: 100, height: 44 },
 });
