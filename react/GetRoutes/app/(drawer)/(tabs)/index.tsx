@@ -43,6 +43,7 @@ interface RouteItem {
 }
 
 export default function Index() {
+  const [busId, setBusId] = useState('bus_003');
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [locationStatus, setLocationStatus] = useState('avairable');
@@ -51,7 +52,7 @@ export default function Index() {
   const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
 
   // バスID - 実際の環境に合わせて変更してください
-  const busId = 'bus_003';
+  // const busId = 'bus_003';
 
   // 位置情報送信機能を統合
   const {
@@ -150,6 +151,12 @@ export default function Index() {
     { label: '30分', value: '30' },
     { label: '45分', value: '45' },
   ];
+
+  // 設定画面で選択されたbusIdを取得
+  useEffect(() => {
+    const selected = localStorage.getItem('selectedBusId');
+    if (selected) setBusId(selected);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
