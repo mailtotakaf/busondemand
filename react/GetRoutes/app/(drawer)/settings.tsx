@@ -28,59 +28,15 @@ export default function SettingsScreen() {
         <Ionicons name="menu-outline" size={28} />
       </TouchableOpacity>
 
-      <Text style={styles.label}>状態</Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={status}
-          onValueChange={(itemValue) => setStatus(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="受付中" value="available" />
-          <Picker.Item label="休憩中" value="break" />
-          <Picker.Item label="本日受付終了" value="finish" />
-        </Picker>
-      </View>
-      <View style={styles.row}>
-        <View style={[styles.pickerWrapper, { marginRight: 8 }]}>
-          <Picker
-            selectedValue={time}
-            onValueChange={(itemValue) => setTime(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="08:00" value="08:00" />
-            <Picker.Item label="09:00" value="09:00" />
-            <Picker.Item label="10:00" value="10:00" />
-            <Picker.Item label="11:00" value="11:00" />
-            <Picker.Item label="12:00" value="12:00" />
-            <Picker.Item label="13:00" value="13:00" />
-            <Picker.Item label="14:00" value="14:00" />
-            <Picker.Item label="15:00" value="15:00" />
-            <Picker.Item label="16:00" value="16:00" />
-            <Picker.Item label="17:00" value="17:00" />
-          </Picker>
-        </View>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={quarter}
-            onValueChange={(itemValue) => setQuarter(itemValue)}
-            style={styles.picker}
-          >
-            {quarterOptions.map((opt) => (
-              <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
-            ))}
-          </Picker>
-        </View>
-        <Text style={{ marginLeft: 8 }}>まで</Text>
-      </View>
+      <Text style={styles.screenTitle}>設定画面</Text>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
-  label: { fontSize: 18, marginBottom: 8 },
-  pickerWrapper: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 100 },
-  picker: { width: 100, height: 44 },
+  screenTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 24, marginTop: 24 },
   row: { flexDirection: 'row', alignItems: 'center', marginTop: 24 },
   menuButton: { position: 'absolute', top: 40, left: 20, zIndex: 10 },
 });
