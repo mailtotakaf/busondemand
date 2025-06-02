@@ -1,12 +1,15 @@
 import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
 
-export const useLocationSender = (
+export function useLocationSender(
   busId: string,
   apiUrl: string,
-  startImmediately = false
-) => {
-  const [isTracking, setIsTracking] = useState(startImmediately);
+  autoStart: boolean,
+  locationStatus: string, // 追加
+  time: string,           // 追加
+  quarter: string         // 追加
+) {
+  const [isTracking, setIsTracking] = useState(autoStart);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [lastSentTime, setLastSentTime] = useState<Date | null>(null);
@@ -39,7 +42,7 @@ export const useLocationSender = (
         },
         (loc) => {
           setLocation(loc);
-          sendLocationToAPI(loc);
+          sendLocation(loc.coords);
         }
       );
 
@@ -57,19 +60,19 @@ export const useLocationSender = (
     };
   }, [isTracking]);
 
-  const sendLocationToAPI = async (loc: Location.LocationObject) => {
+  const sendLocation = async (coords: Location.LocationObject['coords']) => {
     try {
-      const body = {
-        busId,
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-        status: 'active', // TODO: 位置情報送信時のステータス
-        timestamp: new Date().toISOString(),
-      };
       await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          busId,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          status: locationStatus, // 追加
+          time: time,             // 追加
+          quarter: quarter        // 追加
+        }),
       });
       setLastSentTime(new Date());
     } catch (error) {
