@@ -30,6 +30,7 @@ def lambda_handler(event, context):
         bus_id = body["busId"]
         latitude = body["latitude"]
         longitude = body["longitude"]
+        status = body.get("status", "stop")
         until = body.get("until", None)
         timestamp = body.get("timestamp", datetime.utcnow().isoformat())
 
@@ -38,6 +39,7 @@ def lambda_handler(event, context):
                 "busId": bus_id,
                 "latitude": str(latitude),
                 "longitude": str(longitude),
+                "status": status,
                 "until": until,
                 "timestamp": timestamp,
             }
