@@ -17,8 +17,8 @@ ORS_API_KEY = os.environ["ORS_API_KEY"]
 dynamodb = boto3.resource("dynamodb")
 
 
-def get_bus_status():
-    table = dynamodb.Table("bus_status")
+def get_bus_locations():
+    table = dynamodb.Table("bus_locations")
     response = table.scan()
     return response.get("Items", [])
 
@@ -161,6 +161,8 @@ def buses_info(buses: List[Dict[str, Any]], user_req: Dict[str, Any]) -> Dict[st
         'next_available': {'until': '...'} | {'anytime': True} | None
     }
     """
+    print("get_bus_locations():", get_bus_locations())
+
     # ── 新規依頼 ─────────────────────────────
     req_drop = _parse_dt(user_req["requestDateTime"])
     pu_lon, pu_lat = user_req["pickup"]
