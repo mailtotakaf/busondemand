@@ -30,6 +30,7 @@ def lambda_handler(event, context):
         bus_id = body["busId"]
         latitude = body["latitude"]
         longitude = body["longitude"]
+        until = body.get("until", None)
         timestamp = body.get("timestamp", datetime.utcnow().isoformat())
 
         table.put_item(
@@ -37,6 +38,7 @@ def lambda_handler(event, context):
                 "busId": bus_id,
                 "latitude": str(latitude),
                 "longitude": str(longitude),
+                "until": until,
                 "timestamp": timestamp,
             }
         )
