@@ -70,7 +70,7 @@ class _RequestScreenState extends State<RequestScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  isConfirmed ? "予約確定" : title, // ← ここを変更
+                  isConfirmed ? "予約確定" : title,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
