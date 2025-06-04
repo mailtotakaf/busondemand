@@ -154,6 +154,89 @@ def travel_min(lat1, lon1, lat2, lon2, speed=_SPEED_KMH) -> float:
 # ────────────────────────────── メイン ──────────────────────────────
 def buses_info(buses: List[Dict[str, Any]], user_req: Dict[str, Any]) -> Dict[str, Any]:
     """
+    空の `buses` → DynamoDB から現在地を使った判定
+    非空          → これまでの「既存予約あり」ロジック（関数 _legacy_schedule_logic）
+    """
+    if buses:  # 既存予約がある場合は従来ロジックへ
+        return _legacy_schedule_logic(buses, user_req)
+
+    # ────────────────── ここから「予約ゼロ」ケース ──────────────────
+    # 1) 新規依頼
+    req_drop = _parse_dt(user_req["requestDateTime"])
+    pu_lon, pu_lat = user_req["pickup"]
+    do_lon, do_lat = user_req["dropoff"]
+    pu2do_min = travel_min(pu_lat, pu_lon, do_lat, do_lon)
+    latest_pick = req_drop - timedelta(minutes=pu2do_min)
+
+    # 2) 稼働中バス
+    locs = [loc for loc in get_bus_locations() if loc.get("status") == "avairable"]
+    if not locs:
+        # バスが１台も稼働していない
+        return {"earlier": None, "on_time": None, "next_available": None}
+
+    # 3) until 時刻を「requestDate と同じ日付」に紐づける関数
+    def _until_datetime(until_str: str) -> datetime:
+        # "8:00" / "08:00" / "9:00" など想定
+        until_t = datetime.strptime(until_str.zfill(5), "%H:%M").time()
+        dt = datetime.combine(req_drop.date(), until_t)
+        # もし until が依頼時刻より前で、かつ “翌朝 8:00” のように跨ぐ運用なら +1day する
+        if dt < req_drop:
+            dt += timedelta(days=1)
+        return dt
+
+    # 4) バスごとに所要時間を算出
+    candidates = []
+    for loc in locs:
+        bus_id = loc["busId"]
+        loc_lat = _to_f(loc["latitude"])
+        loc_lon = _to_f(loc["longitude"])
+        until_dt = _until_datetime(str(loc["until"]).replace("：", ":").strip())
+
+        to_pick_min = travel_min(loc_lat, loc_lon, pu_lat, pu_lon)
+        # Pickup は「今すぐ動き出した」と仮定して latest_pick に合わせる
+        # 依頼到着に間に合うか判定
+        can_on_time = until_dt >= req_drop
+        candidates.append(
+            {
+                "busId": bus_id,
+                "until_dt": until_dt,
+                "to_pick_min": to_pick_min,
+                "can_on_time": can_on_time,
+            }
+        )
+
+    # 5) on_time になる（dropoff <= until）バスの中で一番近いもの
+    on_pool = [c for c in candidates if c["can_on_time"]]
+    if on_pool:
+        on_choice = min(on_pool, key=lambda c: c["to_pick_min"])
+        on_time = {
+            "busId": on_choice["busId"],
+            "pickupTime": latest_pick.strftime(_DT_FMT_OUT),
+            "dropoffTime": req_drop.strftime(_DT_FMT_OUT),
+        }
+        used_id = on_choice["busId"]
+    else:
+        on_time = None
+        used_id = None
+
+    # 6) earlier: 予約ゼロ & 稼働中なので基本 anytime
+    earlier = {"anytime": True}
+
+    # 7) next_available:
+    rest = [c for c in candidates if c["busId"] != used_id]
+    if rest:
+        nxt = min(rest, key=lambda c: c["until_dt"])
+        next_available = {"until": nxt["until_dt"].strftime(_DT_FMT_OUT)}
+    else:
+        next_available = None
+
+    return {"earlier": earlier, "on_time": on_time, "next_available": next_available}
+
+
+def _legacy_schedule_logic(
+    buses: List[Dict[str, Any]], user_req: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
     返却例:
     {
         'earlier': {'anytime': True},
