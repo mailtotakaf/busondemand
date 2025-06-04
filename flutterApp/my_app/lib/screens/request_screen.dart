@@ -417,15 +417,15 @@ class _RequestScreenState extends State<RequestScreen> {
       },
       "userId": "user121", // TODO:
       "busId": "bus_003", // TODO:
-      // "simplified_route":
-      //     _simplifiedRoute
-      //         .map(
-      //           (latLng) => {
-      //             "latitude": latLng.latitude,
-      //             "longitude": latLng.longitude,
-      //           },
-      //         )
-      //         .toList(),
+      "simplified_route":
+          _simplifiedRoute
+              .map(
+                (latLng) => {
+                  "latitude": latLng.latitude,
+                  "longitude": latLng.longitude,
+                },
+              )
+              .toList(),
       "selectedType": _selectedType,
       "passengerCount": _passengerCount,
       // "wheelchair": true, // TODO: 以下情報後回し
