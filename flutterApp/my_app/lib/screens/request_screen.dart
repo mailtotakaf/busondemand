@@ -275,28 +275,27 @@ class _RequestScreenState extends State<RequestScreen> {
                   ),
                   const SizedBox(height: 8),
                   if (_busesInfoMap.isNotEmpty) ...[
-                    _buildRouteCard(
-                      'もっと早い時間',
-                      Colors.blue,
-                      _busesInfoMap['earlier'],
-                      'earlier',
-                    ),
-                    const SizedBox(height: 8),
-                    _buildRouteCard(
-                      '指定した時間',
-                      Colors.green,
-                      _busesInfoMap['on_time'],
-                      'on_time',
-                    ),
+                    if (_busesInfoMap['earlier'] != null)
+                      _buildRouteCard(
+                        'もっと早い時間',
+                        Colors.blue,
+                        _busesInfoMap['earlier'],
+                        'earlier',
+                      ),
+                    if (_busesInfoMap['on_time'] != null)
+                      _buildRouteCard(
+                        '指定した時間',
+                        Colors.green,
+                        _busesInfoMap['on_time'],
+                        'on_time',
+                      ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
                       onPressed: () {
                         setState(() {
                           _busesInfoMap.clear();
-                          _simplifiedRoute.clear();
+                          // _simplifiedRoute.clear();
                           _otherRoutePoints.clear();
-                          // pickupTime = "";
-                          // dropoffTime = "";
                         });
                       },
                       icon: Icon(Icons.cancel),
@@ -457,7 +456,7 @@ class _RequestScreenState extends State<RequestScreen> {
             // 何も指定がなければ全て消す
             _busesInfoMap.clear();
           }
-          _simplifiedRoute.clear();
+          // _simplifiedRoute.clear();
           _otherRoutePoints.clear();
         });
       } else {
