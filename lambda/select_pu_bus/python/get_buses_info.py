@@ -17,12 +17,6 @@ ORS_API_KEY = os.environ["ORS_API_KEY"]
 dynamodb = boto3.resource("dynamodb")
 
 
-# def get_bus_locations():
-#     table = dynamodb.Table("bus_locations")
-#     response = table.scan()
-#     return response.get("Items", [])
-
-
 def get_bus_locations() -> List[Dict[str, Any]]:
     table = dynamodb.Table("bus_locations")
     resp = table.scan()
@@ -110,14 +104,6 @@ def estimate_boarding_and_dropoff_point(bus, user_pickup, user_dropoff):
     }
 
 
-# def estimate_travel_time_min(lat1, lon1, lat2, lon2, speed_kmh=20):
-#     dx = (lon1 - lon2) * 111000 * math.cos(math.radians((lat1 + lat2) / 2))
-#     dy = (lat1 - lat2) * 111000
-#     distance_m = abs(dx) + abs(dy)
-#     speed_mps = speed_kmh * 1000 / 3600
-#     return distance_m / 60 / speed_mps
-
-
 def _fmt(info):
     return {
         "arrival_from": info["arrival_from"].strftime("%Y-%m-%d %H:%M:%S"),
@@ -134,26 +120,6 @@ def parse_time(time_str: str) -> datetime:
 _DT_FMT_OUT = "%Y-%m-%d %H:%M"
 _SPEED_KMH = 20  # 平均走行速度
 _RELOC_BUFFER_MIN = 10  # 追加で取る余裕（min）…必要なら調整してください
-
-
-# def _parse_dt(txt: str) -> datetime:
-#     """秒欠落や余計な空白を吸収して datetime へ。"""
-#     txt = re.sub(r"\s{2,}", " ", txt.strip())
-#     txt = re.sub(r":\s+", ":", txt)
-#     if len(txt) == 16:
-#         txt += ":00"
-#     return datetime.strptime(txt, "%Y-%m-%d %H:%M:%S")
-
-# def _to_f(val):
-#     return float(val) if isinstance(val, Decimal) else val
-
-
-# def travel_min(lat1, lon1, lat2, lon2, speed=_SPEED_KMH) -> float:
-#     dx = (lon1 - lon2) * 111_000 * math.cos(math.radians((lat1 + lat2) / 2))
-#     dy = (lat1 - lat2) * 111_000
-#     dist = abs(dx) + abs(dy)
-#     speed_m_per_min = speed * 1000 / 60  # ← ここがポイント
-#     return dist / speed_m_per_min  # **分** で返す
 
 
 def _parse_dt(txt: str) -> datetime:
