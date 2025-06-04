@@ -48,7 +48,7 @@ class _RequestScreenState extends State<RequestScreen> {
 
   Map<String, dynamic> _busesInfoMap = {};
 
-  Widget _buildRouteCard(String title, Color color, busesInfo, String key) {
+  Widget _buildRouteCard(String title, Color color, busesInfo, String key, {bool isConfirmed = false}) {
     String deptTimeText = formatTime(busesInfo?['pickupTime']);
     String arrivalTimeText = formatTime(busesInfo?['dropoffTime']);
     return Container(
@@ -70,7 +70,7 @@ class _RequestScreenState extends State<RequestScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  title,
+                  isConfirmed ? "予約確定" : title, // ← ここを変更
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -94,47 +94,48 @@ class _RequestScreenState extends State<RequestScreen> {
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final result = await showDialog<bool>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('確認'),
-                        content: const Text('この条件で予約してもよろしいですか？'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(false);
-                            },
-                            child: const Text('キャンセル'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(true);
-                            },
-                            child: const Text('予約する'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-
-                  if (result == true) {
-                    _confirmRoute(
-                      busesInfo?['pickupTime'],
-                      busesInfo?['dropoffTime'],
-                      selectedKey: key,
+          if (!isConfirmed)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('確認'),
+                          content: const Text('この条件で予約してもよろしいですか？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              child: const Text('キャンセル'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              child: const Text('予約する'),
+                            ),
+                          ],
+                        );
+                      },
                     );
-                  }
-                },
-                child: const Text('この条件で予約する'),
-              ),
-            ],
-          ),
+
+                    if (result == true) {
+                      _confirmRoute(
+                        busesInfo?['pickupTime'],
+                        busesInfo?['dropoffTime'],
+                        selectedKey: key,
+                      );
+                    }
+                  },
+                  child: const Text('この条件で予約する'),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -281,6 +282,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         Colors.blue,
                         _busesInfoMap['earlier'],
                         'earlier',
+                        isConfirmed: _busesInfoMap.length == 1, // ← 1件だけなら予約確定表示
                       ),
                     if (_busesInfoMap['on_time'] != null)
                       _buildRouteCard(
@@ -288,13 +290,13 @@ class _RequestScreenState extends State<RequestScreen> {
                         Colors.green,
                         _busesInfoMap['on_time'],
                         'on_time',
+                        isConfirmed: _busesInfoMap.length == 1, // ← 1件だけなら予約確定表示
                       ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
                       onPressed: () {
                         setState(() {
                           _busesInfoMap.clear();
-                          // _simplifiedRoute.clear();
                           _otherRoutePoints.clear();
                         });
                       },
