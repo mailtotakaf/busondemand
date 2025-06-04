@@ -48,7 +48,7 @@ class _RequestScreenState extends State<RequestScreen> {
 
   Map<String, dynamic> _busesInfoMap = {};
 
-  Widget _buildRouteCard(String title, Color color, busesInfo) {
+  Widget _buildRouteCard(String title, Color color, busesInfo, String key) {
     String deptTimeText = formatTime(busesInfo?['pickupTime']);
     String arrivalTimeText = formatTime(busesInfo?['dropoffTime']);
     return Container(
@@ -127,6 +127,7 @@ class _RequestScreenState extends State<RequestScreen> {
                     _confirmRoute(
                       busesInfo?['pickupTime'],
                       busesInfo?['dropoffTime'],
+                      selectedKey: key,
                     );
                   }
                 },
@@ -278,12 +279,14 @@ class _RequestScreenState extends State<RequestScreen> {
                       'もっと早い時間',
                       Colors.blue,
                       _busesInfoMap['earlier'],
+                      'earlier',
                     ),
                     const SizedBox(height: 8),
                     _buildRouteCard(
                       '指定した時間',
                       Colors.green,
                       _busesInfoMap['on_time'],
+                      'on_time',
                     ),
                     const SizedBox(height: 8),
                     ElevatedButton.icon(
@@ -391,7 +394,7 @@ class _RequestScreenState extends State<RequestScreen> {
     }
   }
 
-  void _confirmRoute(pickupTime, dropoffTime) async {
+  void _confirmRoute(pickupTime, dropoffTime, {String? selectedKey}) async {
     if (_pickupLatLng == null || _userDropoffLatLng == null) {
       ScaffoldMessenger.of(
         context,
@@ -444,6 +447,19 @@ class _RequestScreenState extends State<RequestScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("バスの予約が完了しました。")));
+
+        // RouteCardを1つだけ残す
+        setState(() {
+          if (selectedKey != null) {
+            // 指定したRouteCardのみ残す
+            _busesInfoMap.removeWhere((key, value) => key != selectedKey);
+          } else {
+            // 何も指定がなければ全て消す
+            _busesInfoMap.clear();
+          }
+          _simplifiedRoute.clear();
+          _otherRoutePoints.clear();
+        });
       } else {
         print("失敗: ${response.statusCode} - ${response.body}");
         ScaffoldMessenger.of(
