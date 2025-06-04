@@ -136,25 +136,53 @@ _SPEED_KMH = 20  # 平均走行速度
 _RELOC_BUFFER_MIN = 10  # 追加で取る余裕（min）…必要なら調整してください
 
 
+# def _parse_dt(txt: str) -> datetime:
+#     """秒欠落や余計な空白を吸収して datetime へ。"""
+#     txt = re.sub(r"\s{2,}", " ", txt.strip())
+#     txt = re.sub(r":\s+", ":", txt)
+#     if len(txt) == 16:
+#         txt += ":00"
+#     return datetime.strptime(txt, "%Y-%m-%d %H:%M:%S")
+
+# def _to_f(val):
+#     return float(val) if isinstance(val, Decimal) else val
+
+
+# def travel_min(lat1, lon1, lat2, lon2, speed=_SPEED_KMH) -> float:
+#     dx = (lon1 - lon2) * 111_000 * math.cos(math.radians((lat1 + lat2) / 2))
+#     dy = (lat1 - lat2) * 111_000
+#     dist = abs(dx) + abs(dy)
+#     speed_m_per_min = speed * 1000 / 60  # ← ここがポイント
+#     return dist / speed_m_per_min  # **分** で返す
+
+
 def _parse_dt(txt: str) -> datetime:
-    """秒欠落や余計な空白を吸収して datetime へ。"""
     txt = re.sub(r"\s{2,}", " ", txt.strip())
     txt = re.sub(r":\s+", ":", txt)
-    if len(txt) == 16:
+    if len(txt) == 16:  # 秒が無ければ :00
         txt += ":00"
     return datetime.strptime(txt, "%Y-%m-%d %H:%M:%S")
 
 
-def _to_f(val):
-    return float(val) if isinstance(val, Decimal) else val
+def _to_f(v):
+    """
+    Decimal, int, float, str いずれでも → float に変換。
+    それ以外は TypeError を投げて気付けるようにする。
+    """
+    if isinstance(v, (Decimal, int, float)):
+        return float(v)
+    elif isinstance(v, str):
+        return float(v.replace("：", ":").strip())  # 全角コロン対策だけお好みで
+    else:
+        raise TypeError(f"Unsupported type for lat/lon: {type(v)}")
 
 
 def travel_min(lat1, lon1, lat2, lon2, speed=_SPEED_KMH) -> float:
     dx = (lon1 - lon2) * 111_000 * math.cos(math.radians((lat1 + lat2) / 2))
     dy = (lat1 - lat2) * 111_000
-    dist = abs(dx) + abs(dy)
-    speed_m_per_min = speed * 1000 / 60  # ← ここがポイント
-    return dist / speed_m_per_min  # **分** で返す
+    dist_m = abs(dx) + abs(dy)
+    speed_m_per_min = speed * 1000 / 60
+    return dist_m / speed_m_per_min  # 分
 
 
 # ────────────────────────────── メイン ──────────────────────────────
