@@ -32,7 +32,7 @@ def lambda_handler(event, context):
             "pickupTime": body["pickup"]["pickupTime"],
             "dropoffTime": body["dropoff"]["dropoffTime"],
             "busId": body["busId"],
-            # "simplified_route": convert_floats_to_decimals(body["simplified_route"]),
+            "simplified_route": convert_floats_to_decimals(body["simplified_route"]),
             "status": "pending",
         }
         # print("item:", item)
