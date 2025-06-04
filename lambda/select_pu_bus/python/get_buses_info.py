@@ -17,10 +17,16 @@ ORS_API_KEY = os.environ["ORS_API_KEY"]
 dynamodb = boto3.resource("dynamodb")
 
 
-def get_bus_locations():
+# def get_bus_locations():
+#     table = dynamodb.Table("bus_locations")
+#     response = table.scan()
+#     return response.get("Items", [])
+
+
+def get_bus_locations() -> List[Dict[str, Any]]:
     table = dynamodb.Table("bus_locations")
-    response = table.scan()
-    return response.get("Items", [])
+    resp = table.scan()
+    return resp.get("Items", [])
 
 
 def euclidean_distance(lat1, lon1, lat2, lon2):
@@ -168,8 +174,10 @@ def buses_info(buses: List[Dict[str, Any]], user_req: Dict[str, Any]) -> Dict[st
     pu2do_min = travel_min(pu_lat, pu_lon, do_lat, do_lon)
     latest_pick = req_drop - timedelta(minutes=pu2do_min)
 
+    print("1")
     # 2) 稼働中バス
     locs = [loc for loc in get_bus_locations() if loc.get("status") == "avairable"]
+    print("2")
     if not locs:
         # バスが１台も稼働していない
         return {"earlier": None, "on_time": None, "next_available": None}
