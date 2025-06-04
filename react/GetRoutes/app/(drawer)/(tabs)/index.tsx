@@ -157,8 +157,27 @@ export default function Index() {
 
   // 設定画面で選択されたbusIdを取得
   useEffect(() => {
+    console.log('Index useEffect busId１:', busId);
     const selected = localStorage.getItem('selectedBusId');
     if (selected) setBusId(selected);
+  }, []);
+
+  // busIdをlocalStorageから常に取得する
+  useEffect(() => {
+    console.log('Index useEffect busId２:', busId);
+    const handleStorage = () => {
+      const selected = localStorage.getItem('selectedBusId');
+      if (selected) setBusId(selected);
+    };
+    // 初回取得
+    handleStorage();
+    // ストレージ変更時も反映
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('busIdChanged', handleStorage); // ← 追加
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('busIdChanged', handleStorage); // ← 追加
+    };
   }, []);
 
   return (

@@ -41,7 +41,11 @@ export default function SettingsScreen() {
       <View style={styles.pickerWrapper}>
         <Picker
           selectedValue={busId}
-          onValueChange={(itemValue) => setBusId(itemValue)}
+          onValueChange={(itemValue) => {
+            setBusId(itemValue);
+            localStorage.setItem('selectedBusId', itemValue);
+            window.dispatchEvent(new Event('busIdChanged')); // ← 追加
+          }}
           style={styles.picker}
         >
           <Picker.Item label="bus_001" value="bus_001" />
