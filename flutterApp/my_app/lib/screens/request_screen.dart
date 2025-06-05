@@ -94,6 +94,27 @@ class _RequestScreenState extends State<RequestScreen> {
               ),
             ],
           ),
+          if (isConfirmed)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _busesInfoMap.clear();
+                      _otherRoutePoints.clear();
+                    });
+                  },
+                  icon: Icon(Icons.cancel),
+                  label: Text('キャンセル'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 110, 110, 171),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
           if (!isConfirmed)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -269,10 +290,8 @@ class _RequestScreenState extends State<RequestScreen> {
                     dropoffController: _dropoffAddressController,
                     pickupLabel: _pickupAddress,
                     dropoffLabel: _dropoffAddress,
-                    onPickupSearch:
-                        (text) => _searchAddressJP(text, isPickup: true),
-                    onDropoffSearch:
-                        (text) => _searchAddressJP(text, isPickup: false),
+                    onPickupSearch: (text) => _searchAddressJP(text, isPickup: true),
+                    onDropoffSearch: (text) => _searchAddressJP(text, isPickup: false),
                   ),
                   const SizedBox(height: 8),
                   if (_busesInfoMap.isNotEmpty) ...[
@@ -282,7 +301,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         Colors.blue,
                         _busesInfoMap['earlier'],
                         'earlier',
-                        isConfirmed: _busesInfoMap.length == 1, // ← 1件だけなら予約確定表示
+                        isConfirmed: _busesInfoMap.length == 1, // 1件だけなら予約確定表示
                       ),
                     if (_busesInfoMap['on_time'] != null)
                       _buildRouteCard(
@@ -290,26 +309,28 @@ class _RequestScreenState extends State<RequestScreen> {
                         Colors.green,
                         _busesInfoMap['on_time'],
                         'on_time',
-                        isConfirmed: _busesInfoMap.length == 1, // ← 1件だけなら予約確定表示
+                        isConfirmed: _busesInfoMap.length == 1, // 1件だけなら予約確定表示
                       ),
                     const SizedBox(height: 8),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _busesInfoMap.clear();
-                          _otherRoutePoints.clear();
-                        });
-                      },
-                      icon: Icon(Icons.cancel),
-                      label: Text('条件をキャンセルする'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                    // 「予約確定」時は「条件をキャンセルする」ボタンを非表示にする
+                    if (_busesInfoMap.length != 1)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _busesInfoMap.clear();
+                            _otherRoutePoints.clear();
+                          });
+                        },
+                        icon: Icon(Icons.cancel),
+                        label: Text('条件をキャンセルする'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ],
               ),
