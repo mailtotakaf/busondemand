@@ -150,6 +150,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         busesInfo?['pickupTime'],
                         busesInfo?['dropoffTime'],
                         selectedKey: key,
+                        busId: busesInfo?['busId'], // ここでbusIdを渡す
                       );
                     }
                   },
@@ -301,7 +302,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         Colors.blue,
                         _busesInfoMap['earlier'],
                         'earlier',
-                        isConfirmed: _busesInfoMap.length == 1, // 1件だけなら予約確定表示
+                        isConfirmed: _busesInfoMap.length == 1,
                       ),
                     if (_busesInfoMap['on_time'] != null)
                       _buildRouteCard(
@@ -309,7 +310,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         Colors.green,
                         _busesInfoMap['on_time'],
                         'on_time',
-                        isConfirmed: _busesInfoMap.length == 1, // 1件だけなら予約確定表示
+                        isConfirmed: _busesInfoMap.length == 1,
                       ),
                     const SizedBox(height: 8),
                     // 「予約確定」時は「条件をキャンセルする」ボタンを非表示にする
@@ -416,7 +417,7 @@ class _RequestScreenState extends State<RequestScreen> {
     }
   }
 
-  void _confirmRoute(pickupTime, dropoffTime, {String? selectedKey}) async {
+  void _confirmRoute(pickupTime, dropoffTime, {String? selectedKey, String? busId}) async {
     if (_pickupLatLng == null || _userDropoffLatLng == null) {
       ScaffoldMessenger.of(
         context,
@@ -438,7 +439,7 @@ class _RequestScreenState extends State<RequestScreen> {
         "dropoffTime": dropoffTime,
       },
       "userId": "user121", // TODO:
-      "busId": "bus_003", // TODO:
+      "busId": busId ?? "bus_003", // TODO:
       "simplified_route":
           _simplifiedRoute
               .map(
