@@ -152,85 +152,117 @@ def travel_min(lat1, lon1, lat2, lon2, speed=_SPEED_KMH) -> float:
 
 
 # ────────────────────────────── メイン ──────────────────────────────
+# ... 省略（共通 util は前回と同じ。_to_f() は str/Decimal 両対応版） ...
+
+def _until_datetime(until_str: str, base_date: datetime) -> datetime:
+    """
+    '8:00' → base_date 当日の 08:00
+    '23:30' → 同日の 23:30。
+    依頼時刻より前の場合は「翌日」とみなす。
+    """
+    t = datetime.strptime(until_str.zfill(5), "%H:%M").time()
+    dt = datetime.combine(base_date.date(), t)
+    if dt < base_date:
+        dt += timedelta(days=1)
+    return dt
+
+
 def buses_info(buses: List[Dict[str, Any]], user_req: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    空の `buses` → DynamoDB から現在地を使った判定
-    非空          → これまでの「既存予約あり」ロジック（関数 _legacy_schedule_logic）
-    """
-    if buses:  # 既存予約がある場合は従来ロジックへ
+    if buses:                      # 既存予約がある場合は旧ロジックへ
         return _legacy_schedule_logic(buses, user_req)
 
-    # ────────────────── ここから「予約ゼロ」ケース ──────────────────
-    # 1) 新規依頼
+    # ───────────────── 空＝“現在地ベース” ─────────────────
     req_drop = _parse_dt(user_req["requestDateTime"])
     pu_lon, pu_lat = user_req["pickup"]
     do_lon, do_lat = user_req["dropoff"]
     pu2do_min = travel_min(pu_lat, pu_lon, do_lat, do_lon)
     latest_pick = req_drop - timedelta(minutes=pu2do_min)
 
-    print("1")
-    # 2) 稼働中バス
-    locs = [loc for loc in get_bus_locations() if loc.get("status") == "avairable"]
-    print("2")
+    # 稼働バスの現在地
+    locs = [l for l in get_bus_locations() if l.get("status") == "avairable"]
     if not locs:
-        # バスが１台も稼働していない
         return {"earlier": None, "on_time": None, "next_available": None}
 
-    # 3) until 時刻を「requestDate と同じ日付」に紐づける関数
-    def _until_datetime(until_str: str) -> datetime:
-        # "8:00" / "08:00" / "9:00" など想定
-        until_t = datetime.strptime(until_str.zfill(5), "%H:%M").time()
-        dt = datetime.combine(req_drop.date(), until_t)
-        # もし until が依頼時刻より前で、かつ “翌朝 8:00” のように跨ぐ運用なら +1day する
-        if dt < req_drop:
-            dt += timedelta(days=1)
-        return dt
-
-    # 4) バスごとに所要時間を算出
-    candidates = []
+    # バスごとの可動ウィンドウを求める
+    windows = []
     for loc in locs:
         bus_id = loc["busId"]
         loc_lat = _to_f(loc["latitude"])
         loc_lon = _to_f(loc["longitude"])
-        until_dt = _until_datetime(str(loc["until"]).replace("：", ":").strip())
+        until_dt = _until_datetime(str(loc["until"]), req_drop)
 
-        to_pick_min = travel_min(loc_lat, loc_lon, pu_lat, pu_lon)
-        # Pickup は「今すぐ動き出した」と仮定して latest_pick に合わせる
-        # 依頼到着に間に合うか判定
-        can_on_time = until_dt >= req_drop
-        candidates.append(
-            {
-                "busId": bus_id,
-                "until_dt": until_dt,
-                "to_pick_min": to_pick_min,
-                "can_on_time": can_on_time,
-            }
-        )
+        to_pick_min  = travel_min(loc_lat, loc_lon, pu_lat, pu_lon)
+        earliest_pick = datetime.now() + timedelta(minutes=to_pick_min)   # “今すぐ出れば”
+        earliest_drop = earliest_pick + timedelta(minutes=pu2do_min)
 
-    # 5) on_time になる（dropoff <= until）バスの中で一番近いもの
-    on_pool = [c for c in candidates if c["can_on_time"]]
-    if on_pool:
-        on_choice = min(on_pool, key=lambda c: c["to_pick_min"])
+        latest_drop   = until_dt                         # 勤務終了直前
+        latest_pick   = latest_drop - timedelta(minutes=pu2do_min)
+
+        if earliest_drop > latest_drop:                  # 物理的に無理
+            continue
+
+        windows.append({
+            "busId": bus_id,
+            "from_pick": earliest_pick,
+            "from_drop": earliest_drop,
+            "until_pick": latest_pick,
+            "until_drop": latest_drop,
+        })
+
+    # on_time 候補： window が req_drop を挟めるもの
+    on_pool = [w for w in windows if w["from_drop"] <= req_drop <= w["until_drop"]]
+    on_choice = min(on_pool, key=lambda w: w["from_pick"], default=None)
+
+    if on_choice:
         on_time = {
-            "busId": on_choice["busId"],
-            "pickupTime": latest_pick.strftime(_DT_FMT_OUT),
-            "dropoffTime": req_drop.strftime(_DT_FMT_OUT),
+            "busId":       on_choice["busId"],
+            "pickupTime":  latest_pick.strftime(_DT_FMT_OUT),
+            "dropoffTime": req_drop.strftime(_DT_FMT_OUT)
         }
-        used_id = on_choice["busId"]
+        chosen_id = on_choice["busId"]
     else:
-        on_time = None
-        used_id = None
+        on_time   = None
+        chosen_id = None
 
-    # 6) earlier: 予約ゼロ & 稼働中なので基本 anytime
-    earlier = {"anytime": True}
+    # earlier: until_drop < req_drop で最も req_drop に近いもの
+    earlier_pool = [
+        w for w in windows if w["until_drop"] < req_drop and w["busId"] != chosen_id
+    ]
+    earlier = None
+    if earlier_pool:
+        e = max(earlier_pool, key=lambda w: w["until_drop"])
+        earlier = {
+            "from": {
+                "busId":      e["busId"],
+                "pickupTime": e["from_pick"].strftime(_DT_FMT_OUT),
+                "dropoffTime":e["from_drop"].strftime(_DT_FMT_OUT)
+            },
+            "until": {
+                "busId":      e["busId"],
+                "pickupTime": e["until_pick"].strftime(_DT_FMT_OUT),
+                "dropoffTime":e["until_drop"].strftime(_DT_FMT_OUT)
+            }
+        }
 
-    # 7) next_available:
-    rest = [c for c in candidates if c["busId"] != used_id]
-    if rest:
-        nxt = min(rest, key=lambda c: c["until_dt"])
-        next_available = {"until": nxt["until_dt"].strftime(_DT_FMT_OUT)}
-    else:
-        next_available = None
+    # next_available: from_drop > req_drop で最も近いもの
+    next_pool = [
+        w for w in windows if w["from_drop"] > req_drop and w["busId"] != chosen_id
+    ]
+    next_available = None
+    if next_pool:
+        n = min(next_pool, key=lambda w: w["from_drop"])
+        next_available = {
+            "from": {
+                "busId":      n["busId"],
+                "pickupTime": n["from_pick"].strftime(_DT_FMT_OUT),
+                "dropoffTime":n["from_drop"].strftime(_DT_FMT_OUT)
+            },
+            "until": {
+                "busId":      n["busId"],
+                "pickupTime": n["until_pick"].strftime(_DT_FMT_OUT),
+                "dropoffTime":n["until_drop"].strftime(_DT_FMT_OUT)
+            }
+        }
 
     return {"earlier": earlier, "on_time": on_time, "next_available": next_available}
 
