@@ -464,13 +464,11 @@ class _RequestScreenState extends State<RequestScreen> {
 
   void _confirmRoute(pickupTime, dropoffTime, {String? selectedKey, String? busId}) async {
     if (_pickupLatLng == null || _userDropoffLatLng == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("乗車位置と到着位置の両方を入力してください")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("乗車位置と到着位置の両方を入力してください")));
       return;
     }
 
-    final url = Uri.parse(API_GW_URL);
+    final requestId = (busId ?? "bus_999") + "_" + DateTime.now().toIso8601String();
 
     final data = {
       "pickup": {
@@ -483,9 +481,9 @@ class _RequestScreenState extends State<RequestScreen> {
         "longitude": _userDropoffLatLng!.longitude,
         "dropoffTime": dropoffTime,
       },
-      "requestId": (busId ?? "bus_999") + "_" + DateTime.now().toIso8601String(),
-      "userId": "user121", // TODO:
-      "busId": busId ?? "bus_999", // TODO:
+      "requestId": requestId,
+      "userId": "user121",
+      "busId": busId ?? "bus_999",
       "simplified_route":
           _simplifiedRoute
               .map(
@@ -513,20 +511,19 @@ class _RequestScreenState extends State<RequestScreen> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("バスの予約が完了しました。")));
-
-        // RouteCardを1つだけ残す
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("バスの予約が完了しました。")));
         setState(() {
           if (selectedKey != null) {
-            // 指定したRouteCardのみ残す
+            // 指定したRouteCardのみ残す＋requestIdをセット
+            _busesInfoMap.forEach((key, value) {
+              if (key == selectedKey) {
+                value['requestId'] = requestId;
+              }
+            });
             _busesInfoMap.removeWhere((key, value) => key != selectedKey);
           } else {
-            // 何も指定がなければ全て消す
             _busesInfoMap.clear();
           }
-          // _simplifiedRoute.clear();
           _otherRoutePoints.clear();
         });
       } else {
