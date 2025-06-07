@@ -27,7 +27,9 @@ def get_other_user_requests():
     table = dynamodb.Table("user_requests")
     # "status"が"complete"、"incident"以外のレコードを取得
     response = table.scan(
-        FilterExpression=Attr("status").ne("complete") & Attr("status").ne("incident")
+        FilterExpression=Attr("status").ne("complete")
+        & Attr("status").ne("incident")
+        & Attr("status").ne("canceled")
     )
     return response["Items"]
 
