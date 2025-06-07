@@ -37,7 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => RequestScreen()),
       );
     } catch (e) {
-      setState(() => _error = 'ログイン失敗: $e');
+      print("login_screen Error: $e");
+      setState(() => _error = 'ログイン失敗');
     }
   }
 
