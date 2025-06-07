@@ -366,6 +366,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           setState(() {
                             _busesInfoMap.clear();
                             _otherRoutePoints.clear();
+                            _simplifiedRoute.clear(); // マップ上の線も消す
                           });
                         },
                         icon: Icon(Icons.cancel),
