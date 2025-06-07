@@ -39,11 +39,18 @@ resource "aws_lambda_function" "select_pu_bus" {
   filename      = "lambda_function.zip"
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.12"
-  timeout       = 10           # ← タイムアウト時間（秒）
-  memory_size   = 128          # メモリも必要に応じて増やせます
+  timeout       = 10
+  memory_size   = 128
 
   role = aws_iam_role.lambda_role.arn
   source_code_hash = filebase64sha256("lambda_function.zip")
+
+  # ここから環境変数を追加
+  environment {
+    variables = {
+      ORS_API_KEY = "your_ors_api_key_here"
+    }
+  }
 }
 
 resource "aws_apigatewayv2_api" "select_pu_bus_api" {
