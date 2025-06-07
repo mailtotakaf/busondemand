@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
+import 'package:my_app/screens/confirm_screen.dart';
+import 'signup_screen.dart'; // ← 追加
 
 final userPool = CognitoUserPool(
   'us-west-2_uoaxagXJ3',
@@ -50,14 +52,28 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: true,
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _signIn,
-              child: Text('ログイン'),
+            ElevatedButton(onPressed: _signIn, child: Text('ログイン')),
+            TextButton(
+              onPressed: () {
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => SignUpScreen()),
+                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            ConfirmScreen(email: _emailController.text),
+                  ),
+                );
+              },
+              child: Text('新規登録はこちら'),
             ),
             if (_error != null) ...[
               SizedBox(height: 16),
               Text(_error!, style: TextStyle(color: Colors.red)),
-            ]
+            ],
           ],
         ),
       ),
