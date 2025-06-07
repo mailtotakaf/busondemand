@@ -41,6 +41,13 @@ resource "aws_lambda_function" "cancel_user_req" {
 resource "aws_apigatewayv2_api" "cancel_api" {
   name          = "cancel-user-req-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["OPTIONS", "POST"]
+    allow_headers = ["content-type"]
+    max_age       = 86400
+  }
 }
 
 resource "aws_lambda_permission" "apigw" {
