@@ -137,6 +137,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           setState(() {
                             _busesInfoMap.clear();
                             _otherRoutePoints.clear();
+                            _simplifiedRoute.clear(); // ← 追加：マップ上の線も消す
                           });
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
