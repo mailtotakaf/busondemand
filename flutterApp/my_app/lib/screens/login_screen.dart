@@ -36,10 +36,14 @@ class _LoginScreenState extends State<LoginScreen> {
       print(session?.getAccessToken()?.getJwtToken());
       setState(() => _isLoading = false); // ローディング終了
 
+      final attributes = await cognitoUser.getUserAttributes();
+      final emailAttr = attributes?.firstWhere((a) => a.getName() == 'email', orElse: () => CognitoUserAttribute(name: 'email', value: ''));
+      final userEmail = emailAttr?.getValue() ?? '';
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => RequestScreen(),
+          builder: (context) => RequestScreen(userEmail: userEmail),
         ),
       );
     } catch (e) {

@@ -18,6 +18,9 @@ final SELECT_PU_BUS_API_URL = env.SELECT_PU_BUS_API_URL;
 final CANCEL_USER_REQ_API_URL = env.CANCEL_USER_REQ_API_URL;
 
 class RequestScreen extends StatefulWidget {
+  final String userEmail;
+  RequestScreen({required this.userEmail});
+
   @override
   State<RequestScreen> createState() => _RequestScreenState();
 }
@@ -517,7 +520,7 @@ class _RequestScreenState extends State<RequestScreen> {
         "dropoffTime": dropoffTime,
       },
       "requestId": requestId,
-      "userId": "user121",
+      "userId": widget.userEmail,
       "busId": busId ?? "bus_999",
       "simplified_route":
           _simplifiedRoute
