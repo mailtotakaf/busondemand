@@ -3,10 +3,11 @@ import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:my_app/screens/confirm_screen.dart';
 import 'signup_screen.dart'; // ← 追加
 import 'request_screen.dart'; // 追加
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final userPool = CognitoUserPool(
-  'us-west-2_uoaxagXJ3',
-  'lqtg505ssbpf9bo3dbr5halmi',
+  dotenv.env['COGNITO_USER_POOL_ID']!,
+  dotenv.env['COGNITO_CLIENT_ID']!,
 );
 
 class LoginScreen extends StatefulWidget {
