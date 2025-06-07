@@ -19,7 +19,7 @@ final CANCEL_USER_REQ_API_URL = env.CANCEL_USER_REQ_API_URL;
 
 class RequestScreen extends StatefulWidget {
   @override
-  _RequestScreenState createState() => _RequestScreenState();
+  State<RequestScreen> createState() => _RequestScreenState();
 }
 
 class _RequestScreenState extends State<RequestScreen> {
@@ -299,7 +299,20 @@ class _RequestScreenState extends State<RequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sample')),
+      appBar: AppBar(
+        title: Text('requests.'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.menu), // ハンバーガーメニューアイコン
+            onPressed: () {
+              // メニューを開く処理（例: ドロワーを開く、ダイアログ表示など）
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('メニューが押されました')),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           SizedBox(
