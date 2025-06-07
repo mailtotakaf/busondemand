@@ -19,8 +19,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String? _error;
+  bool _isLoading = false; // ← 追加
 
   Future<void> _signIn() async {
+    setState(() {
+      _isLoading = true; // ローディング開始
+      _error = null;
+    });
     try {
       final cognitoUser = CognitoUser(_emailController.text, userPool);
       final authDetails = AuthenticationDetails(
@@ -29,12 +34,12 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       final session = await cognitoUser.authenticateUser(authDetails);
       print(session?.getAccessToken()?.getJwtToken());
-      setState(() => _error = null);
+      setState(() => _isLoading = false); // ローディング終了
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => ConfirmScreen(email: _emailController.text),
+          builder: (context) => RequestScreen(),
         ),
       );
     } catch (e) {
@@ -43,7 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (e is CognitoClientException && e.code == 'UserNotFoundException') {
         errorMsg = 'ユーザーが未登録です。新規登録してください。';
       }
-      setState(() => _error = errorMsg);
+      setState(() {
+        _error = errorMsg;
+        _isLoading = false; // ローディング終了
+      });
     }
   }
 
@@ -65,7 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: true,
             ),
             SizedBox(height: 16),
-            ElevatedButton(onPressed: _signIn, child: Text('ログイン')),
+            _isLoading
+                ? CircularProgressIndicator() // ローディング中はインジケーター表示
+                : ElevatedButton(onPressed: _signIn, child: Text('ログイン')),
             TextButton(
               onPressed: () {
                 Navigator.push(
