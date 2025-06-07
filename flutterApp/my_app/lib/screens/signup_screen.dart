@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
+import 'confirm_screen.dart';
 
 final userPool = CognitoUserPool(
   'us-west-2_uoaxagXJ3',
@@ -29,6 +30,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _error = null;
         _message = 'サインアップ成功！メールを確認してください。';
       });
+      if (result.userConfirmed == false) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ConfirmScreen(email: _emailController.text),
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         _error = 'サインアップ失敗: $e';
