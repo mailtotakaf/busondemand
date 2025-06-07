@@ -505,7 +505,7 @@ class _RequestScreenState extends State<RequestScreen> {
 
     try {
       final response = await http.post(
-        url,
+        Uri.parse(API_GW_URL),
         headers: {"Content-Type": "application/json"},
         body: json.encode(data),
       );
