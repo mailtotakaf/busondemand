@@ -386,6 +386,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         'earlier',
                         isConfirmed: _busesInfoMap.length == 1,
                       ),
+                    SizedBox(height: 8), // 追加：上下の間隔を調整
                     if (_busesInfoMap['on_time'] != null)
                       _buildRouteCard(
                         '指定した時間',
