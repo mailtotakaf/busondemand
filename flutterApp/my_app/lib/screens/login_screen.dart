@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:amazon_cognito_identity_dart_2/cognito.dart';
 import 'package:my_app/screens/confirm_screen.dart';
 import 'signup_screen.dart'; // ← 追加
+import 'request_screen.dart'; // 追加
 
 final userPool = CognitoUserPool(
   'us-west-2_uoaxagXJ3',
@@ -28,7 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final session = await cognitoUser.authenticateUser(authDetails);
       print(session?.getAccessToken()?.getJwtToken());
       setState(() => _error = null);
-      // ログイン成功時の画面遷移など
+
+      // ログイン成功時にRequestScreenへ遷移
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => RequestScreen()),
+      );
     } catch (e) {
       setState(() => _error = 'ログイン失敗: $e');
     }
