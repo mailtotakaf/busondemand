@@ -31,14 +31,19 @@ class _LoginScreenState extends State<LoginScreen> {
       print(session?.getAccessToken()?.getJwtToken());
       setState(() => _error = null);
 
-      // ログイン成功時にRequestScreenへ遷移
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => RequestScreen()),
+        MaterialPageRoute(
+          builder: (context) => ConfirmScreen(email: _emailController.text),
+        ),
       );
     } catch (e) {
       print("login_screen Error: $e");
-      setState(() => _error = 'ログイン失敗');
+      String errorMsg = 'ログイン失敗';
+      if (e is CognitoClientException && e.code == 'UserNotFoundException') {
+        errorMsg = 'ユーザーが未登録です。新規登録してください。';
+      }
+      setState(() => _error = errorMsg);
     }
   }
 
@@ -63,17 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(onPressed: _signIn, child: Text('ログイン')),
             TextButton(
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => SignUpScreen()),
-                // );
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            ConfirmScreen(email: _emailController.text),
-                  ),
+                  MaterialPageRoute(builder: (context) => SignUpScreen()),
                 );
               },
               child: Text('新規登録はこちら'),
