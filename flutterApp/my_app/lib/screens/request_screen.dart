@@ -122,11 +122,13 @@ class _RequestScreenState extends State<RequestScreen> {
                     );
                     if (result == true) {
                       final requestId = busesInfo?['requestId'];
+                      final busId = busesInfo?['busId'];
+                      print("requestId: $requestId, busId: $busId");
                       try {
                         final response = await http.post(
                           Uri.parse(CANCEL_USER_REQ_API_URL),
                           headers: {'Content-Type': 'application/json'},
-                          body: json.encode({'requestId': requestId}),
+                          body: json.encode({'requestId': requestId, 'busId': busId}),
                         );
                         if (response.statusCode == 200) {
                           ScaffoldMessenger.of(context).showSnackBar(
