@@ -264,6 +264,71 @@ def buses_info(buses: List[Dict[str, Any]], user_req: Dict[str, Any]) -> Dict[st
             }
         }
 
+    # DynamoDBからuser_requestsテーブルを取得
+    user_requests_table = dynamodb.Table("user_requests")
+    # 依頼者・バス・時刻などで該当リクエストを検索（例: userId, busId, pickupTime, dropoffTime などでfilter）
+    def find_request_id(bus_id, pickup_time, dropoff_time):
+        # 必要に応じてインデックスやフィルタ条件を調整してください
+        resp = user_requests_table.scan(
+            FilterExpression="busId = :busId AND pickupTime = :pickupTime AND dropoffTime = :dropoffTime",
+            ExpressionAttributeValues={
+                ":busId": bus_id,
+                ":pickupTime": pickup_time,
+                ":dropoffTime": dropoff_time,
+            }
+        )
+        items = resp.get("Items", [])
+        if items:
+            return items[0].get("requestId")
+        return None
+
+    # on_time
+    if on_time:
+        on_time["requestId"] = find_request_id(
+            on_time["busId"],
+            on_time["pickupTime"],
+            on_time["dropoffTime"]
+        )
+    # earlier
+    if earlier:
+        # earlierの構造によってfrom/until両方に付与したい場合は両方に
+        if "busId" in earlier:
+            earlier["requestId"] = find_request_id(
+                earlier["busId"],
+                earlier["pickupTime"],
+                earlier["dropoffTime"]
+            )
+        elif "from" in earlier and "until" in earlier:
+            earlier["from"]["requestId"] = find_request_id(
+                earlier["from"]["busId"],
+                earlier["from"]["pickupTime"],
+                earlier["from"]["dropoffTime"]
+            )
+            earlier["until"]["requestId"] = find_request_id(
+                earlier["until"]["busId"],
+                earlier["until"]["pickupTime"],
+                earlier["until"]["dropoffTime"]
+            )
+    # next_available
+    if next_available:
+        if "busId" in next_available:
+            next_available["requestId"] = find_request_id(
+                next_available["busId"],
+                next_available["pickupTime"],
+                next_available["dropoffTime"]
+            )
+        elif "from" in next_available and "until" in next_available:
+            next_available["from"]["requestId"] = find_request_id(
+                next_available["from"]["busId"],
+                next_available["from"]["pickupTime"],
+                next_available["from"]["dropoffTime"]
+            )
+            next_available["until"]["requestId"] = find_request_id(
+                next_available["until"]["busId"],
+                next_available["until"]["pickupTime"],
+                next_available["until"]["dropoffTime"]
+            )
+
     return {"earlier": earlier, "on_time": on_time, "next_available": next_available}
 
 
