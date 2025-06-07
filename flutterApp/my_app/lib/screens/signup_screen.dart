@@ -40,7 +40,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = 'サインアップ失敗: $e';
+        print("signup_screen Error: $e");
+        String errorMsg = 'サインアップ失敗';
+        if (e is CognitoClientException && e.code == 'UsernameExistsException') {
+          errorMsg = 'User already exists.';
+        }
+        _error = errorMsg;
         _message = null;
       });
     }

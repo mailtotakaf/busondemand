@@ -25,7 +25,7 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
       final result = await cognitoUser.confirmRegistration(_codeController.text);
       setState(() {
         _error = null;
-        _message = result == 'SUCCESS'
+        _message = result == 'true'
             ? '認証が完了しました！ログインしてください。'
             : '認証に失敗しました: $result';
       });
@@ -57,7 +57,29 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
             ),
             if (_message != null) ...[
               SizedBox(height: 16),
-              Text(_message!, style: TextStyle(color: Colors.green)),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(color: Colors.green, fontSize: 16),
+                  children: [
+                    TextSpan(text: '認証が完了しました！'),
+                    WidgetSpan(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushReplacementNamed('/');
+                        },
+                        child: Text(
+                          'ログイン',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextSpan(text: 'してください。'),
+                  ],
+                ),
+              ),
             ],
             if (_error != null) ...[
               SizedBox(height: 16),
