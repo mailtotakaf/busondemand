@@ -46,18 +46,8 @@ resource "aws_lambda_function" "select_pu_bus" {
   source_code_hash = filebase64sha256("lambda_function.zip")
 }
 
-# resource "aws_lambda_function" "put_bus_location" {
-#   function_name = "put_bus_location"
-#   filename      = "put_bus_location/lambda_function.zip"
-#   handler       = "lambda_function.lambda_handler"
-#   runtime       = "python3.12"
-
-#   role = aws_iam_role.lambda_role.arn
-#   source_code_hash = filebase64sha256("put_bus_location/lambda_function.zip")
-# }
-
-resource "aws_apigatewayv2_api" "bus_locations_api" {
-  name          = "bus_locations_api"
+resource "aws_apigatewayv2_api" "select_pu_bus_api" {
+  name          = "select_pu_bus_api"
   protocol_type = "HTTP"
 
   # 🔽 HTTP APIのCORS構成は「APIレベル」で設定
@@ -70,35 +60,21 @@ resource "aws_apigatewayv2_api" "bus_locations_api" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id             = aws_apigatewayv2_api.bus_locations_api.id
+  api_id             = aws_apigatewayv2_api.select_pu_bus_api.id
   integration_type   = "AWS_PROXY"
   integration_uri    = aws_lambda_function.select_pu_bus.invoke_arn
   integration_method = "POST"
   payload_format_version = "2.0"
 }
 
-# resource "aws_apigatewayv2_integration" "put_bus_location_integration" {
-#   api_id                 = aws_apigatewayv2_api.bus_locations_api.id
-#   integration_type       = "AWS_PROXY"
-#   integration_uri        = aws_lambda_function.put_bus_location.invoke_arn
-#   integration_method     = "POST"
-#   payload_format_version = "2.0"
-# }
-
 resource "aws_apigatewayv2_route" "select_pu_bus" {
-  api_id    = aws_apigatewayv2_api.bus_locations_api.id
+  api_id    = aws_apigatewayv2_api.select_pu_bus_api.id
   route_key = "POST /select_pu_bus"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
-# resource "aws_apigatewayv2_route" "put_bus_location" {
-#   api_id    = aws_apigatewayv2_api.bus_locations_api.id
-#   route_key = "POST /put_bus_location"
-#   target    = "integrations/${aws_apigatewayv2_integration.put_bus_location_integration.id}"
-# }
-
 resource "aws_apigatewayv2_stage" "dev" {
-  api_id      = aws_apigatewayv2_api.bus_locations_api.id
+  api_id      = aws_apigatewayv2_api.select_pu_bus_api.id
   name        = "dev"
   auto_deploy = true
   default_route_settings {
@@ -120,27 +96,14 @@ resource "aws_lambda_permission" "apigw_invoke" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.select_pu_bus.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.bus_locations_api.execution_arn}/*/*"
+  source_arn    = "${aws_apigatewayv2_api.select_pu_bus_api.execution_arn}/*/*"
 }
-
-# resource "aws_lambda_permission" "put_bus_location_api_permission" {
-#   statement_id  = "AllowAPIGatewayInvokePutBusLocation"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.put_bus_location.function_name
-#   principal     = "apigateway.amazonaws.com"
-#   source_arn    = "${aws_apigatewayv2_api.bus_locations_api.execution_arn}/*/*"
-# }
 
 # use this command if already exists: terraform import aws_cloudwatch_log_group.select_pu_bus_log_group /aws/lambda/select_pu_bus
 resource "aws_cloudwatch_log_group" "select_pu_bus_log_group" {
   name              = "/aws/lambda/select_pu_bus"
   retention_in_days = 7
 }
-
-# resource "aws_cloudwatch_log_group" "put_bus_location_log_group" {
-#   name              = "/aws/lambda/put_bus_location"
-#   retention_in_days = 7
-# }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   role       = aws_iam_role.lambda_role.name
