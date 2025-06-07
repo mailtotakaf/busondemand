@@ -99,11 +99,55 @@ class _RequestScreenState extends State<RequestScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _busesInfoMap.clear();
-                      _otherRoutePoints.clear();
-                    });
+                  onPressed: () async {
+                    final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('キャンセル確認'),
+                          content: const Text('この予約をキャンセルしますか？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('いいえ'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('はい'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (result == true) {
+                      // --- ここでAPIを叩く ---
+                      final cancelApiUrl = '<<キャンセルAPIのエンドポイントURL>>'; // 例: https://xxxxxx.execute-api.ap-northeast-1.amazonaws.com/cancel_request
+                      final requestId = busesInfo?['requestId'];
+                      try {
+                        final response = await http.post(
+                          Uri.parse(cancelApiUrl),
+                          headers: {'Content-Type': 'application/json'},
+                          body: json.encode({'requestId': requestId}),
+                        );
+                        if (response.statusCode == 200) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('予約をキャンセルしました')),
+                          );
+                          setState(() {
+                            _busesInfoMap.clear();
+                            _otherRoutePoints.clear();
+                          });
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('キャンセルに失敗しました')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('通信エラーが発生しました')),
+                        );
+                      }
+                    }
                   },
                   icon: Icon(Icons.cancel),
                   label: Text('キャンセル'),
