@@ -483,8 +483,9 @@ class _RequestScreenState extends State<RequestScreen> {
         "longitude": _userDropoffLatLng!.longitude,
         "dropoffTime": dropoffTime,
       },
+      "requestId": (busId ?? "bus_999") + "_" + DateTime.now().toIso8601String(),
       "userId": "user121", // TODO:
-      "busId": busId ?? "bus_003", // TODO:
+      "busId": busId ?? "bus_999", // TODO:
       "simplified_route":
           _simplifiedRoute
               .map(

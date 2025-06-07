@@ -23,7 +23,7 @@ def lambda_handler(event, context):
         print("Received body:", body)
 
         item = {
-            "requestId": body["busId"] + "_" + datetime.now(timezone.utc).isoformat(),
+            "requestId": body["requestId"],
             "userId": body["userId"],
             "selectedType": body["selectedType"],
             "passengerCount": body["passengerCount"],
@@ -63,17 +63,3 @@ def convert_floats_to_decimals(obj):
         return Decimal(str(obj))
     else:
         return obj
-
-
-# def convert_coordinates_to_latlng(points):
-#     result = []
-#     for point in points:
-#         coords = point.get("coordinates")
-#         if coords and len(coords) == 2:
-#             result.append(
-#                 {
-#                     "latitude": Decimal(str(coords[1])),
-#                     "longitude": Decimal(str(coords[0])),
-#                 }
-#             )
-#     return result
