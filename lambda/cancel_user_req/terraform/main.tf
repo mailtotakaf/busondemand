@@ -21,6 +21,11 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamodb" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 resource "aws_lambda_function" "cancel_user_req" {
   function_name = "cancel_user_req"
   handler       = "handler_cancel.lambda_handler"
@@ -64,4 +69,9 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.cancel_api.id
   name        = "$default"
   auto_deploy = true
+}
+
+resource "aws_cloudwatch_log_group" "cancel_user_req_log_group" {
+  name              = "/aws/lambda/cancel_user_req"
+  retention_in_days = 14  # 必要に応じて変更
 }

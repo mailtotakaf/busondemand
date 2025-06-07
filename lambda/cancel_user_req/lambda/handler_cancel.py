@@ -4,13 +4,17 @@ import boto3
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table("user_requests")
 
+
 def lambda_handler(event, context):
+    print("Received event:", event)
     try:
         body = json.loads(event["body"])
-        request_id = body["requestId"]
 
         table.update_item(
-            Key={"requestId": request_id},
+            Key={
+                "busId": body["busId"],
+                "requestId": body["requestId"],
+            },
             UpdateExpression="SET #s = :canceled",
             ExpressionAttributeNames={"#s": "status"},
             ExpressionAttributeValues={":canceled": "canceled"},

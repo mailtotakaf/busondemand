@@ -15,6 +15,7 @@ import '../../env.dart' as env;
 
 final API_GW_URL = env.API_GW_URL;
 final SELECT_PU_BUS_API_URL = env.SELECT_PU_BUS_API_URL;
+final CANCEL_USER_REQ_API_URL = env.CANCEL_USER_REQ_API_URL;
 
 class RequestScreen extends StatefulWidget {
   @override
@@ -120,12 +121,10 @@ class _RequestScreenState extends State<RequestScreen> {
                       },
                     );
                     if (result == true) {
-                      // --- ここでAPIを叩く ---
-                      final cancelApiUrl = '<<キャンセルAPIのエンドポイントURL>>'; // 例: https://xxxxxx.execute-api.ap-northeast-1.amazonaws.com/cancel_request
                       final requestId = busesInfo?['requestId'];
                       try {
                         final response = await http.post(
-                          Uri.parse(cancelApiUrl),
+                          Uri.parse(CANCEL_USER_REQ_API_URL),
                           headers: {'Content-Type': 'application/json'},
                           body: json.encode({'requestId': requestId}),
                         );
