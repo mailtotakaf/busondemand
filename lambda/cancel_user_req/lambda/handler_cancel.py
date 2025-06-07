@@ -6,9 +6,9 @@ table = dynamodb.Table("user_requests")
 
 
 def lambda_handler(event, context):
-    print("Received event:", event)
     try:
         body = json.loads(event["body"])
+        print("Received body:", body)
 
         table.update_item(
             Key={
