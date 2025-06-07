@@ -3,16 +3,17 @@ provider "aws" {
 }
 
 # use before this command If already exists: terraform import aws_dynamodb_table.bus_locations bus_locations
-resource "aws_dynamodb_table" "bus_locations" {
-  name           = "bus_locations"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "current_id"
+# resource "aws_dynamodb_table" "bus_locations" {
+#   name           = "bus_locations"
+#   billing_mode   = "PAY_PER_REQUEST"
+#   hash_key       = "current_id"
 
-  attribute {
-    name = "current_id"
-    type = "S"
-  }
-}
+#   attribute {
+#     name = "current_id"
+#     type = "S"
+#   }
+# }
+# bus_locationsダブってたから削除した
 
 # use before this command If already exists: terraform import aws_iam_role.lambda_role lambda-dynamo-role
 resource "aws_iam_role" "lambda_role" {
