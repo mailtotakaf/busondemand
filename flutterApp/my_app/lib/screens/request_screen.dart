@@ -302,16 +302,36 @@ class _RequestScreenState extends State<RequestScreen> {
       appBar: AppBar(
         title: Text('requests.'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.menu), // ハンバーガーメニューアイコン
-            onPressed: () {
-              // メニューを開く処理（例: ドロワーを開く、ダイアログ表示など）
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('メニューが押されました')),
-              );
-            },
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
           ),
         ],
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('メニュー', style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('ログアウト'),
+              onTap: () {
+                // ログアウト処理（例: ログイン画面に遷移）
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
