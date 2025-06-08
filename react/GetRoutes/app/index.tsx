@@ -3,9 +3,7 @@ import { Button, View, Linking, FlatList, Text, StyleSheet, SafeAreaView } from 
 import { useLocationSender } from '../hooks/useLocationSender';
 import Constants from 'expo-constants';
 import { Picker } from '@react-native-picker/picker';
-import { Auth } from 'aws-amplify';
 import { useRouter } from 'expo-router';
-import '../src/amplifyConfig';
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
@@ -137,13 +135,6 @@ export default function Index() {
   ];
 
   const router = useRouter();
-
-  useEffect(() => {
-    Auth.currentAuthenticatedUser()
-      .catch(() => {
-        router.replace('/login');
-      });
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

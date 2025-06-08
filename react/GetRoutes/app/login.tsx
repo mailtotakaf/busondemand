@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { Auth } from 'aws-amplify';
 import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
