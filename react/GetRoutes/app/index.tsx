@@ -193,7 +193,8 @@ export default function Index() {
                     <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
                   ))}
                 </Picker>
-              </View>&nbsp;まで
+              </View>
+              <Text>まで</Text>
             </View>
           )}
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
