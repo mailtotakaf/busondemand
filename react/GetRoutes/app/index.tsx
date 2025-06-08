@@ -133,36 +133,9 @@ export default function Index() {
     { label: '45分', value: '45' },
   ];
 
-  // 設定画面で選択されたbusIdを取得
-  useEffect(() => {
-    console.log('Index useEffect busId１:', busId);
-    const selected = localStorage.getItem('selectedBusId');
-    if (selected) setBusId(selected);
-  }, []);
-
-  // busIdをlocalStorageから常に取得する
-  useEffect(() => {
-    console.log('Index useEffect busId２:', busId);
-    const handleStorage = () => {
-      const selected = localStorage.getItem('selectedBusId');
-      if (selected) setBusId(selected);
-    };
-    // 初回取得
-    handleStorage();
-    // ストレージ変更時も反映
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener('busIdChanged', handleStorage); // ← 追加
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('busIdChanged', handleStorage); // ← 追加
-    };
-  }, []);
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* バスIDを左上に表示 */}
       <Text style={styles.busIdLabel}>{busId}</Text>
-      {/* 位置情報送信コントロールエリア */}
       <View style={styles.locationControlArea}>
         <View style={{ flex: 1 }}>
           <View style={styles.switchContainer}>
