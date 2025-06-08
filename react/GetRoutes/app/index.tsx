@@ -34,7 +34,7 @@ interface RouteItem {
 }
 
 export default function Index() {
-  const [busId, setBusId] = useState('bus_003');
+  const [busId, setBusId] = useState('bus_001');
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [locationStatus, setLocationStatus] = useState('stop');

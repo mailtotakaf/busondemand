@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
+
+const { COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID } = Constants.expoConfig?.extra || {};
+
+const poolData = {
+  UserPoolId: COGNITO_USER_POOL_ID,
+  ClientId: COGNITO_CLIENT_ID,
+};
+const userPool = new CognitoUserPool(poolData);
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -8,13 +18,18 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleLogin = async () => {
-    try {
-      await Auth.signIn(email, password);
-      router.replace('/'); // ログイン成功でメイン画面へ
-    } catch (e: any) {
-      setError(e.message || 'ログイン失敗');
-    }
+  const handleLogin = () => {
+    const user = new CognitoUser({ Username: email, Pool: userPool });
+    const authDetails = new AuthenticationDetails({ Username: email, Password: password });
+
+    user.authenticateUser(authDetails, {
+      onSuccess: () => {
+        router.replace('/'); // ログイン成功でメイン画面へ
+      },
+      onFailure: (err) => {
+        setError(err.message || 'ログイン失敗');
+      },
+    });
   };
 
   return (
