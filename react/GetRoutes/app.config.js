@@ -13,6 +13,7 @@ export default {
       COGNITO_REGION: process.env.COGNITO_REGION,
       COGNITO_USER_POOL_ID: process.env.COGNITO_USER_POOL_ID,
       COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
+      DRIVER_PROF_API: process.env.DRIVER_PROF_API,
     },
   },
 };

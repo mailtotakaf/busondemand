@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 
 const { COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID } = Constants.expoConfig?.extra || {};
+const { DRIVER_PROF_API } = Constants.expoConfig?.extra || {};
 
 const poolData = {
   UserPoolId: COGNITO_USER_POOL_ID,
@@ -23,8 +24,19 @@ export default function LoginScreen() {
     const authDetails = new AuthenticationDetails({ Username: email, Password: password });
 
     user.authenticateUser(authDetails, {
-      onSuccess: () => {
-        router.replace('/'); // ログイン成功でメイン画面へ
+      onSuccess: async () => {
+        try {
+          // driver-apiにGETパラメータでメールアドレスを送信
+          const res = await fetch(`${DRIVER_PROF_API}?email=${encodeURIComponent(email)}`);
+          // console.log('res', res);
+          if (res.status === 200) {
+            router.replace('/');
+          } else {
+            setError('認証に失敗しました');
+          }
+        } catch (e) {
+          setError('API通信エラー');
+        }
       },
       onFailure: (err) => {
         setError(err.message || 'ログイン失敗');
