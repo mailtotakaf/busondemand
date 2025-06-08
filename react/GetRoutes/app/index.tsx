@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Button, View, Linking, FlatList, Text, StyleSheet, SafeAreaView } from 'react-native';
-import { useLocationSender } from '../hooks/useLocationSender';
+import { View, Text, StyleSheet, Platform, Button, Linking, FlatList, SafeAreaView } from 'react-native';
 import Constants from 'expo-constants';
-import { Picker } from '@react-native-picker/picker';
+import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
+import { useLocationSender } from '../hooks/useLocationSender';
+import { Picker } from '@react-native-picker/picker';
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
@@ -33,7 +34,8 @@ interface RouteItem {
   requestId: string;
 }
 
-export default function Index() {
+const IndexScreen = () => {
+  const [idToken, setIdToken] = useState<string | null>(null);
   const [busId, setBusId] = useState('bus_001');
   const [data, setData] = useState<RouteItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,21 +57,41 @@ export default function Index() {
     quarter         // ← 追加
   );
 
-  const fetchData = async () => {
-    try {
-      console.log('データ取得開始:', busId);
-      const response = await fetch(`https://hgbu7mkzsk.execute-api.us-west-2.amazonaws.com/bus?busId=${busId}`);
-      const json = await response.json();
-      console.log('json:', json);
-      setData(json);
-    } catch (error) {
-      console.error('データ取得エラー:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const router = useRouter();
 
   useEffect(() => {
+    const checkAuth = async () => {
+      let token: string | null = null;
+      if (Platform.OS === 'web') {
+        token = localStorage.getItem('idToken');
+      } else {
+        token = await SecureStore.getItemAsync('idToken');
+      }
+      setIdToken(token);
+
+      // 未ログインならログイン画面へリダイレクト
+      if (!token) {
+        router.replace('/login');
+      }
+    };
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log('データ取得開始:', busId);
+        const response = await fetch(`https://hgbu7mkzsk.execute-api.us-west-2.amazonaws.com/bus?busId=${busId}`);
+        const json = await response.json();
+        console.log('json:', json);
+        setData(json);
+      } catch (error) {
+        console.error('データ取得エラー:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, [busId]);
 
@@ -134,7 +156,13 @@ export default function Index() {
     { label: '45分', value: '45' },
   ];
 
-  const router = useRouter();
+  if (!idToken) {
+    return (
+      <View style={styles.container}>
+        <Text>認証確認中...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -224,7 +252,7 @@ export default function Index() {
       )}
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -348,3 +376,5 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 });
+
+export default IndexScreen;
