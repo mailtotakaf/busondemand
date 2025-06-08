@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Button, View, Linking, FlatList, Text, StyleSheet, Switch, SafeAreaView } from 'react-native';
+import { Button, View, Linking, FlatList, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { useLocationSender } from '../hooks/useLocationSender';
 import Constants from 'expo-constants';
-import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
@@ -43,16 +40,10 @@ export default function Index() {
   const [time, setTime] = useState('08:00');
   const [quarter, setQuarter] = useState('00');
 
-  // バスID - 実際の環境に合わせて変更してください
-  // const busId = 'bus_003';
-
   // 位置情報送信機能を統合
   const {
-    isTracking,
     setIsTracking,
     location,
-    lastSentTime,
-    status: sendStatus,
     errorMsg
   } = useLocationSender(
     busId,
