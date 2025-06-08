@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, View, Linking, FlatList, Text, StyleSheet, Switch, SafeAreaView } from 'react-native';
-import { useLocationSender } from '../../../hooks/useLocationSender';
+import { useLocationSender } from '../hooks/useLocationSender';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
@@ -73,8 +73,10 @@ export default function Index() {
 
   const fetchData = async () => {
     try {
+      console.log('データ取得開始:', busId);
       const response = await fetch(`https://hgbu7mkzsk.execute-api.us-west-2.amazonaws.com/bus?busId=${busId}`);
       const json = await response.json();
+      console.log('json:', json);
       setData(json);
     } catch (error) {
       console.error('データ取得エラー:', error);
@@ -85,14 +87,7 @@ export default function Index() {
 
   useEffect(() => {
     fetchData();
-
-    // 60秒ごとにデータを再取得
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 60000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [busId]);
 
   // Google Mapsで位置表示
   const openGoogleMaps = (lat: number, lng: number) => {
