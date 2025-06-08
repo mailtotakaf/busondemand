@@ -3,6 +3,7 @@ import { Button, View, Linking, FlatList, Text, StyleSheet, SafeAreaView } from 
 import { useLocationSender } from '../hooks/useLocationSender';
 import Constants from 'expo-constants';
 import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
@@ -132,6 +133,16 @@ export default function Index() {
     { label: '30分', value: '30' },
     { label: '45分', value: '45' },
   ];
+
+  const router = useRouter();
+
+  useEffect(() => {
+    // 仮の認証チェック（本番はトークンやストレージで判定）
+    const isLoggedIn = false; // ここを認証状態に置き換える
+    if (!isLoggedIn) {
+      router.replace('/login');
+    }
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
