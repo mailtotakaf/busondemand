@@ -24,7 +24,7 @@ def lambda_handler(event, context):
         # today_prefix = now.strftime("%Y-%m-%d")  # 例: "2025-05-11"
         now_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        # 現在日時（JSTをUTCに変換）
+        # # 現在日時（JSTをUTCに変換）
         jst = timezone(timedelta(hours=9))
         now_jst = datetime.now(jst)
 
@@ -38,19 +38,12 @@ def lambda_handler(event, context):
         print("start_str:", start_str)
         print("end_str:", end_str)
 
-        # pickupTime の prefix で絞り込み
-        response = table.query(
-            IndexName="pickupTime-index",
-            KeyConditionExpression=Key("busId").eq(bus_id)
-            & Key("pickupTime").between(start_str, end_str),
+        response = table.scan(
+            FilterExpression=Attr("busId").eq(bus_id)
+            & Attr("pickupTime").between(start_str, end_str)
         )
-
-        # さらに今より後、かつ busId が一致するものだけ抽出
-        items = [
-            item
-            for item in response.get("Items", [])
-            if item["pickupTime"] >= now_str and item["busId"] == bus_id
-        ]
+        items = response.get("Items", [])
+        print("items:", items)
 
         return {
             "statusCode": 200,
