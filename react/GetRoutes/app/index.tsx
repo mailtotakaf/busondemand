@@ -5,14 +5,7 @@ import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { Picker } from '@react-native-picker/picker';
-
-// あなたのルート定義（任意名）
-type DrawerParamList = {
-  '(tabs)': undefined;
-  // 他に画面があれば追加
-};
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
@@ -49,7 +42,6 @@ export default function Index() {
   const [locationStatus, setLocationStatus] = useState('stop');
   const [time, setTime] = useState('08:00');
   const [quarter, setQuarter] = useState('00');
-  const navigation = useNavigation<DrawerNavigationProp<DrawerParamList>>();
 
   // バスID - 実際の環境に合わせて変更してください
   // const busId = 'bus_003';
@@ -242,11 +234,6 @@ export default function Index() {
           )}
           {errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
         </View>
-
-        {/* ハンバーガーメニューボタン */}
-        <TouchableOpacity onPress={() => navigation.openDrawer?.()}>
-          <Ionicons name="menu-outline" size={28} />
-        </TouchableOpacity>
       </View>
       <Text style={styles.header}>リクエスト一覧</Text>
 
