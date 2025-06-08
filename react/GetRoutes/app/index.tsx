@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, Button, Linking, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Platform, Button, Linking, FlatList, SafeAreaView, Alert } from 'react-native'; // Alert をインポート
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
@@ -156,6 +156,46 @@ const IndexScreen = () => {
     { label: '45分', value: '45' },
   ];
 
+  // ログアウト処理
+  const handleLogout = async () => {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem('idToken');
+    } else {
+      await SecureStore.deleteItemAsync('idToken');
+    }
+    router.replace('/login');
+  };
+
+  // locationStatus 変更ハンドラ
+  const handleLocationStatusChange = (value: string) => {
+    if (value === 'stopped') {
+      Alert.alert(
+        '確認', // ダイアログのタイトル
+        '受付を終了してログアウトしますか？', // ダイアログのメッセージ
+        [
+          {
+            text: 'いいえ', // キャンセルボタン
+            onPress: () => console.log('ログアウトキャンセル'),
+            style: 'cancel',
+          },
+          {
+            text: 'はい', // 確定ボタン
+            onPress: () => {
+              setLocationStatus(value); // 状態を更新
+              setIsTracking(false); // トラッキングを停止
+              handleLogout(); // ログアウト処理を実行
+            },
+          },
+        ],
+        { cancelable: false } // ダイアログ外タップで閉じないように設定
+      );
+    } else {
+      setLocationStatus(value);
+      setIsTracking(value === 'avairable');
+    }
+  };
+
+
   if (!idToken) {
     return (
       <View style={styles.container}>
@@ -173,10 +213,7 @@ const IndexScreen = () => {
             <View style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, width: 120 }}>
               <Picker
                 selectedValue={locationStatus}
-                onValueChange={(value) => {
-                  setLocationStatus(value);
-                  setIsTracking(value === 'avairable');
-                }}
+                onValueChange={handleLocationStatusChange} // ハンドラを修正
                 style={{ width: 120, height: 40 }}
               >
                 <Picker.Item label="停止中" value="stop" />
