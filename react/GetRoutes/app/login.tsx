@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Platform } from 'react-native';
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 
 const { COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID } = Constants.expoConfig?.extra || {};
 const { DRIVER_PROF_API } = Constants.expoConfig?.extra || {};
@@ -30,7 +31,17 @@ export default function LoginScreen() {
           const res = await fetch(`${DRIVER_PROF_API}?email=${encodeURIComponent(email)}`);
           // console.log('res', res);
           if (res.status === 200) {
-            router.replace('/');
+            user.getSession((err, session) => {
+              if (session && session.isValid()) {
+                const idToken = session.getIdToken().getJwtToken();
+                if (Platform.OS === 'web') {
+                  localStorage.setItem('idToken', idToken);
+                } else {
+                  SecureStore.setItemAsync('idToken', idToken);
+                }
+                router.replace('/');
+              }
+            });
           } else {
             setError('認証に失敗しました');
           }
