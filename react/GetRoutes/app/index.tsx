@@ -168,26 +168,28 @@ const IndexScreen = () => {
 
   // locationStatus 変更ハンドラ
   const handleLocationStatusChange = (value: string) => {
+    console.log('Picker value changed to:', value); // この行を追加
     if (value === 'stopped') {
+      console.log('受付終了が選択されました。ダイアログを表示します。'); // この行も追加
       Alert.alert(
-        '確認', // ダイアログのタイトル
-        '受付を終了してログアウトしますか？', // ダイアログのメッセージ
+        '確認',
+        '受付を終了してログアウトしますか？',
         [
           {
-            text: 'いいえ', // キャンセルボタン
+            text: 'いいえ',
             onPress: () => console.log('ログアウトキャンセル'),
             style: 'cancel',
           },
           {
-            text: 'はい', // 確定ボタン
+            text: 'はい',
             onPress: () => {
-              setLocationStatus(value); // 状態を更新
-              setIsTracking(false); // トラッキングを停止
-              handleLogout(); // ログアウト処理を実行
+              setLocationStatus(value);
+              setIsTracking(false);
+              handleLogout();
             },
           },
         ],
-        { cancelable: false } // ダイアログ外タップで閉じないように設定
+        { cancelable: false }
       );
     } else {
       setLocationStatus(value);
