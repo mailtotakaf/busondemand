@@ -40,7 +40,10 @@ def lambda_handler(event, context):
 
         response = table.scan(
             FilterExpression=Attr("busId").eq(bus_id)
-            & Attr("pickupTime").between(start_str, end_str)
+            # & Attr("pickupTime").between(start_str, end_str) // デモなのでコメアウト
+            & Attr("status").ne("complete")
+            & Attr("status").ne("incident")
+            & Attr("status").ne("canceled")
         )
         items = response.get("Items", [])
         print("items:", items)
