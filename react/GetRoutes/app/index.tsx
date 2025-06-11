@@ -107,7 +107,7 @@ const IndexScreen = () => {
     <View style={styles.item}>
       <View style={styles.section}>
         <Text>
-          乗客数: {item.passengerCount}人（車椅子：<Text style={{ fontWeight: 'bold' }}>〇台</Text>）
+          乗客数: {item.passengerCount}人（車イス：<Text style={{ fontWeight: 'bold' }}>〇台</Text>）
         </Text>
       </View>
 
