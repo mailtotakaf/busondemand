@@ -70,9 +70,9 @@ const IndexScreen = () => {
       setIdToken(token);
 
       // 未ログインならログイン画面へリダイレクト
-      // if (!token) {
-      //   router.replace('/login');
-      // }
+      if (!token) {
+        router.replace('/login');
+      }
     };
     checkAuth();
   }, []);
@@ -157,14 +157,14 @@ const IndexScreen = () => {
   ];
 
   // ログアウト処理
-  // const handleLogout = async () => {
-  //   if (Platform.OS === 'web') {
-  //     localStorage.removeItem('idToken');
-  //   } else {
-  //     await SecureStore.deleteItemAsync('idToken');
-  //   }
-  //   router.replace('/login');
-  // };
+  const handleLogout = async () => {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem('idToken');
+    } else {
+      await SecureStore.deleteItemAsync('idToken');
+    }
+    router.replace('/login');
+  };
 
   // locationStatus 変更ハンドラ
   const handleLocationStatusChange = (value: string) => {
@@ -185,7 +185,7 @@ const IndexScreen = () => {
             onPress: () => {
               setLocationStatus(value);
               setIsTracking(false);
-              // handleLogout();
+              handleLogout();
             },
           },
         ],
