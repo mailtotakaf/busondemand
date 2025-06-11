@@ -185,7 +185,7 @@ const IndexScreen = () => {
             onPress: () => {
               setLocationStatus(value);
               setIsTracking(false);
-              // handleLogout();
+              handleLogout();
             },
           },
         ],
