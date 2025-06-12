@@ -50,7 +50,8 @@ const IndexScreen = () => {
     errorMsg
   } = useLocationSender(
     busId,
-    POST_BUS_LOCATIONS_API_URL,
+    // POST_BUS_LOCATIONS_API_URL,
+    "https://xk2l7ps1q9.execute-api.us-west-2.amazonaws.com/location",
     false,
     locationStatus, // ← 追加
     time,           // ← 追加

@@ -5,12 +5,14 @@ import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
-const { COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID } = Constants.expoConfig?.extra || {};
-const { DRIVER_PROF_API } = Constants.expoConfig?.extra || {};
+// const { COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID } = Constants.expoConfig?.extra || {};
+// const { DRIVER_PROF_API } = Constants.expoConfig?.extra || {};
 
 const poolData = {
-  UserPoolId: COGNITO_USER_POOL_ID,
-  ClientId: COGNITO_CLIENT_ID,
+  // UserPoolId: COGNITO_USER_POOL_ID,
+  // ClientId: COGNITO_CLIENT_ID,
+  UserPoolId: "us-west-2_uoaxagXJ3",
+  ClientId: "lqtg505ssbpf9bo3dbr5halmi",
 };
 const userPool = new CognitoUserPool(poolData);
 

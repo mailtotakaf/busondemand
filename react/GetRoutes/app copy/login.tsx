@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
 const { COGNITO_USER_POOL_ID, COGNITO_CLIENT_ID } = Constants.expoConfig?.extra || {};
-const { DRIVER_PROF_API } = Constants.expoConfig?.extra || {};
+// const { DRIVER_PROF_API } = Constants.expoConfig?.extra || {};
 
 const poolData = {
   UserPoolId: COGNITO_USER_POOL_ID,
@@ -28,7 +28,8 @@ export default function LoginScreen() {
       onSuccess: async () => {
         try {
           // driver-apiにGETパラメータでメールアドレスを送信
-          const res = await fetch(`${DRIVER_PROF_API}?email=${encodeURIComponent(email)}`);
+          // const res = await fetch(`${DRIVER_PROF_API}?email=${encodeURIComponent(email)}`);
+          const res = await fetch(`${"https://u98gvtrphh.execute-api.us-west-2.amazonaws.com/driver"}?email=${encodeURIComponent(email)}`);
           // console.log('res', res);
           if (res.status === 200) {
             user.getSession((err, session) => {
