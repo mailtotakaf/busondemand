@@ -21,5 +21,6 @@ export default {
       "expo-router",
       "expo-secure-store"
     ],
+    jsEngine: "jsc",
   },
 };
