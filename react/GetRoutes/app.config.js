@@ -19,6 +19,9 @@ export default {
       // COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
       // DRIVER_PROF_API: process.env.DRIVER_PROF_API,
     },
+    android: {
+      package: "com.yourcompany.getroutes" // ← ここを追加
+    },
     plugins: [
       "expo-font",
       "expo-router",
