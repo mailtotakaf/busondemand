@@ -2,3 +2,11 @@ node_modules
 .git
 .vscode
 *.log
+
+# Flutter 系
+flutterApp/
+**/.dart_tool/
+**/build/
+**/windows/
+# VSCode など
+.vscode/

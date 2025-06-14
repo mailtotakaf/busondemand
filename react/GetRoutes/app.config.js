@@ -5,6 +5,7 @@ export default {
   expo: {
     name: 'GetRoutes',
     slug: 'getroutes',
+    scheme: "getroutes",
     version: '1.0.0',
     sdkVersion: '53.0.0',
     extra: {
@@ -20,8 +21,16 @@ export default {
       // DRIVER_PROF_API: process.env.DRIVER_PROF_API,
     },
     android: {
-      package: "com.yourcompany.getroutes" // ← ここを追加
+      package: "com.yourcompany.getroutes",
+      intentFilters: [
+        {
+          action: "VIEW",
+          data: { scheme: "getroutes" },
+          category: ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
+    ios: { bundleIdentifier: "com.yourcompany.getroutes" },
     plugins: [
       "expo-font",
       "expo-router",
