@@ -52,7 +52,13 @@ class _RequestScreenState extends State<RequestScreen> {
 
   Map<String, dynamic> _busesInfoMap = {};
 
-  Widget _buildRouteCard(String title, Color color, busesInfo, String key, {bool isConfirmed = false}) {
+  Widget _buildRouteCard(
+    String title,
+    Color color,
+    busesInfo,
+    String key, {
+    bool isConfirmed = false,
+  }) {
     String deptTimeText = formatTime(busesInfo?['pickupTime']);
     String arrivalTimeText = formatTime(busesInfo?['dropoffTime']);
     return Container(
@@ -131,7 +137,10 @@ class _RequestScreenState extends State<RequestScreen> {
                         final response = await http.post(
                           Uri.parse(CANCEL_USER_REQ_API_URL),
                           headers: {'Content-Type': 'application/json'},
-                          body: json.encode({'requestId': requestId, 'busId': busId}),
+                          body: json.encode({
+                            'requestId': requestId,
+                            'busId': busId,
+                          }),
                         );
                         if (response.statusCode == 200) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -148,9 +157,9 @@ class _RequestScreenState extends State<RequestScreen> {
                           );
                         }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('通信エラーが発生しました')),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('通信エラーが発生しました')));
                       }
                     }
                   },
@@ -159,7 +168,10 @@ class _RequestScreenState extends State<RequestScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 110, 110, 171),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                 ),
               ],
@@ -287,9 +299,21 @@ class _RequestScreenState extends State<RequestScreen> {
     _getCurrentLocation();
   }
 
+  // クラス内で宣言
+  late ScaffoldMessengerState _scaffoldMessenger;
+
   @override
   void dispose() {
+    // _scaffoldMessengerを使う
+    // contextは使わない
     super.dispose();
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _mapHeight -= details.delta.dy;
+      _mapHeight = _mapHeight.clamp(_minHeight, _maxHeight);
+    });
   }
 
   String formatTime(String? timeStr, {String prefix = ''}) {
@@ -299,6 +323,10 @@ class _RequestScreenState extends State<RequestScreen> {
         : "$prefix不明";
   }
 
+  double _mapHeight = 300;
+  double _minHeight = 200;
+  double _maxHeight = 600;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -306,12 +334,13 @@ class _RequestScreenState extends State<RequestScreen> {
         title: Text('requests.'),
         actions: [
           Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
-            ),
+            builder:
+                (context) => IconButton(
+                  icon: Icon(Icons.menu),
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                ),
           ),
         ],
       ),
@@ -320,10 +349,11 @@ class _RequestScreenState extends State<RequestScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text(
+                'メニュー',
+                style: TextStyle(color: Colors.white, fontSize: 24),
               ),
-              child: Text('メニュー', style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(
               leading: Icon(Icons.logout),
@@ -338,26 +368,61 @@ class _RequestScreenState extends State<RequestScreen> {
       ),
       body: Column(
         children: [
-          SizedBox(
-            height: 300,
-            child: Stack(
+          GestureDetector(
+            onVerticalDragUpdate: _onVerticalDragUpdate,
+            child: Column(
               children: [
-                MapView(
-                  mapController: _mapController,
-                  pickupLatLng: _pickupLatLng,
-                  dropoffLatLng: _dropoffLatLng,
-                  userDropoffLatLng: _userDropoffLatLng,
-                  routePoints: _simplifiedRoute,
-                  otherRoutePoints: _otherRoutePoints,
-                  onMapTap: _onMapTap,
+                // // ドラッグ用ハンドル（見た目のガイド）
+                // Container(
+                //   height: 20,
+                //   width: double.infinity,
+                //   alignment: Alignment.center,
+                //   child: Container(
+                //     width: 40,
+                //     height: 5,
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey,
+                //       borderRadius: BorderRadius.circular(2.5),
+                //     ),
+                //   ),
+                // ),
+                SizedBox(
+                  height: _mapHeight,
+                  child: Stack(
+                    children: [
+                      MapView(
+                        mapController: _mapController,
+                        pickupLatLng: _pickupLatLng,
+                        dropoffLatLng: _dropoffLatLng,
+                        userDropoffLatLng: _userDropoffLatLng,
+                        routePoints: _simplifiedRoute,
+                        otherRoutePoints: _otherRoutePoints,
+                        onMapTap: _onMapTap,
+                      ),
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: FloatingActionButton.small(
+                          onPressed: _moveToCurrentLocation,
+                          child: Icon(Icons.my_location),
+                          tooltip: "現在地に移動",
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: FloatingActionButton.small(
-                    onPressed: _moveToCurrentLocation,
-                    child: Icon(Icons.my_location),
-                    tooltip: "現在地に移動",
+                // ドラッグ用ハンドル（見た目のガイド）
+                Container(
+                  height: 20,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
                   ),
                 ),
               ],
@@ -373,8 +438,10 @@ class _RequestScreenState extends State<RequestScreen> {
                     dropoffController: _dropoffAddressController,
                     pickupLabel: _pickupAddress,
                     dropoffLabel: _dropoffAddress,
-                    onPickupSearch: (text) => _searchAddressJP(text, isPickup: true),
-                    onDropoffSearch: (text) => _searchAddressJP(text, isPickup: false),
+                    onPickupSearch:
+                        (text) => _searchAddressJP(text, isPickup: true),
+                    onDropoffSearch:
+                        (text) => _searchAddressJP(text, isPickup: false),
                   ),
                   const SizedBox(height: 8),
                   if (_busesInfoMap.isNotEmpty) ...[
@@ -501,13 +568,21 @@ class _RequestScreenState extends State<RequestScreen> {
     }
   }
 
-  void _confirmRoute(pickupTime, dropoffTime, {String? selectedKey, String? busId}) async {
+  void _confirmRoute(
+    pickupTime,
+    dropoffTime, {
+    String? selectedKey,
+    String? busId,
+  }) async {
     if (_pickupLatLng == null || _userDropoffLatLng == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("乗車位置と到着位置の両方を入力してください")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("乗車位置と到着位置の両方を入力してください")));
       return;
     }
 
-    final requestId = (busId ?? "bus_999") + "_" + DateTime.now().toIso8601String();
+    final requestId =
+        (busId ?? "bus_999") + "_" + DateTime.now().toIso8601String();
 
     final data = {
       "pickup": {
@@ -550,7 +625,9 @@ class _RequestScreenState extends State<RequestScreen> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("バスの予約が完了しました。")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("バスの予約が完了しました。")));
         setState(() {
           if (selectedKey != null) {
             // 指定したRouteCardのみ残す＋requestIdをセット
