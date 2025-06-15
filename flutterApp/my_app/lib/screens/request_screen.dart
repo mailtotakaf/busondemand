@@ -311,7 +311,7 @@ class _RequestScreenState extends State<RequestScreen> {
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     setState(() {
-      _mapHeight -= details.delta.dy;
+      _mapHeight += details.delta.dy;
       _mapHeight = _mapHeight.clamp(_minHeight, _maxHeight);
     });
   }
@@ -370,6 +370,7 @@ class _RequestScreenState extends State<RequestScreen> {
         children: [
           GestureDetector(
             onVerticalDragUpdate: _onVerticalDragUpdate,
+            behavior: HitTestBehavior.translucent, // 透明領域でも反応
             child: Column(
               children: [
                 SizedBox(
@@ -399,7 +400,7 @@ class _RequestScreenState extends State<RequestScreen> {
                 ),
                 // ドラッグ用ハンドル（見た目のガイド）
                 Container(
-                  height: 20,
+                  height: 30,
                   width: double.infinity,
                   alignment: Alignment.center,
                   child: Container(
