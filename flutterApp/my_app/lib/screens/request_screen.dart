@@ -400,7 +400,7 @@ class _RequestScreenState extends State<RequestScreen> {
                 ),
                 // ドラッグ用ハンドル（見た目のガイド）
                 Container(
-                  height: 30,
+                  height: 20,
                   width: double.infinity,
                   alignment: Alignment.center,
                   child: Container(
@@ -435,7 +435,7 @@ class _RequestScreenState extends State<RequestScreen> {
                     if (_busesInfoMap['earlier'] != null)
                       _buildRouteCard(
                         'もっと早い時間',
-                        Colors.blue,
+                        const Color.fromARGB(255, 33, 200, 255),
                         _busesInfoMap['earlier'],
                         'earlier',
                         isConfirmed: _busesInfoMap.length == 1,
@@ -444,7 +444,7 @@ class _RequestScreenState extends State<RequestScreen> {
                     if (_busesInfoMap['on_time'] != null)
                       _buildRouteCard(
                         '指定した時間',
-                        Colors.green,
+                        const Color.fromARGB(255, 100, 254, 180)),
                         _busesInfoMap['on_time'],
                         'on_time',
                         isConfirmed: _busesInfoMap.length == 1,
@@ -463,7 +463,7 @@ class _RequestScreenState extends State<RequestScreen> {
                         icon: Icon(Icons.cancel),
                         label: Text('条件をキャンセルする'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
+                          backgroundColor: const Color.fromARGB(200, 250, 250, 250),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24,
                             vertical: 12,
