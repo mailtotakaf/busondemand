@@ -39,13 +39,13 @@ class MapView extends StatelessWidget {
           bool tappedAny = false;
 
           // メインルート（青）
-          if (handleMapTap(context, latLng, routePoints, "メインルートす")) {
+          if (handleMapTap(context, latLng, routePoints, "指定した予定のルート")) {
             tappedAny = true;
           }
 
           // 他ルート（オレンジ）
           for (final route in otherRoutePoints) {
-            if (handleMapTap(context, latLng, route, "他ルートす")) {
+            if (handleMapTap(context, latLng, route, "他の予定のルート")) {
               tappedAny = true;
               break;
             }
@@ -153,8 +153,8 @@ bool handleMapTap(
         context: context,
         builder:
             (_) => AlertDialog(
-              title: Text("ルート線がタップされました: $routeName"),
-              content: Text("線分 $i に近い\n距離: ${d.toStringAsFixed(2)} m"),
+              title: Text(routeName, style: TextStyle(fontSize: 18)),
+              // content: Text("線分 $i に近い\n距離: ${d.toStringAsFixed(2)} m"),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
