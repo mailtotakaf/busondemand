@@ -372,20 +372,6 @@ class _RequestScreenState extends State<RequestScreen> {
             onVerticalDragUpdate: _onVerticalDragUpdate,
             child: Column(
               children: [
-                // // ドラッグ用ハンドル（見た目のガイド）
-                // Container(
-                //   height: 20,
-                //   width: double.infinity,
-                //   alignment: Alignment.center,
-                //   child: Container(
-                //     width: 40,
-                //     height: 5,
-                //     decoration: BoxDecoration(
-                //       color: Colors.grey,
-                //       borderRadius: BorderRadius.circular(2.5),
-                //     ),
-                //   ),
-                // ),
                 SizedBox(
                   height: _mapHeight,
                   child: Stack(
