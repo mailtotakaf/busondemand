@@ -21,6 +21,7 @@ export default {
       // DRIVER_PROF_API: process.env.DRIVER_PROF_API,
     },
     android: {
+      permissions: "INTERNET",
       package: "com.yourcompany.getroutes",
       intentFilters: [
         {

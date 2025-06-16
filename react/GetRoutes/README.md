@@ -5,7 +5,7 @@
 npm start
 ```
 
-## Build
+## Build (Run as administrator)
 ```
 npx eas build -p android --profile preview
 ```

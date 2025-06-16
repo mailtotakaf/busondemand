@@ -199,6 +199,14 @@ class _RequestScreenState extends State<RequestScreen> {
                               onPressed: () {
                                 Navigator.of(context).pop(true);
                               },
+                              style: TextButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(255, 100, 250, 255), // 背景色
+                                foregroundColor: const Color.fromARGB(255, 26, 6, 250), // 文字色
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+
                               child: const Text('予約する'),
                             ),
                           ],
@@ -444,7 +452,7 @@ class _RequestScreenState extends State<RequestScreen> {
                     if (_busesInfoMap['on_time'] != null)
                       _buildRouteCard(
                         '指定した時間',
-                        const Color.fromARGB(255, 100, 254, 180)),
+                        const Color.fromARGB(255, 70, 230, 150),
                         _busesInfoMap['on_time'],
                         'on_time',
                         isConfirmed: _busesInfoMap.length == 1,
@@ -463,7 +471,12 @@ class _RequestScreenState extends State<RequestScreen> {
                         icon: Icon(Icons.cancel),
                         label: Text('条件をキャンセルする'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(200, 250, 250, 250),
+                          backgroundColor: const Color.fromARGB(
+                            200,
+                            250,
+                            250,
+                            250,
+                          ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24,
                             vertical: 12,

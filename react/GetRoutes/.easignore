@@ -1,12 +1,16 @@
+# Node modules and IDE settings
 node_modules
 .git
 .vscode
 *.log
 
-# Flutter 系
+# Flutter 系プロジェクトとWindowsビルド関連
 flutterApp/
 **/.dart_tool/
 **/build/
 **/windows/
-# VSCode など
-.vscode/
+**/.plugin_symlinks/
+
+# その他不要ファイル
+.DS_Store
+*.iml
