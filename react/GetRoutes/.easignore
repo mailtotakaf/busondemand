@@ -5,7 +5,9 @@ node_modules
 *.log
 
 # Flutter 系プロジェクトとWindowsビルド関連
-flutterApp/
+flutter/*
+flutterApp/*
+lambda/*
 **/.dart_tool/
 **/build/
 **/windows/

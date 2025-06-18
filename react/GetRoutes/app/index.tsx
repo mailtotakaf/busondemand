@@ -216,7 +216,7 @@ const IndexScreen = () => {
               <Picker
                 selectedValue={locationStatus}
                 onValueChange={handleLocationStatusChange} // ハンドラを修正
-                style={{ width: 120, height: 40 }}
+                style={{ fontSize: 14, height: 40 }} // ここでサイズ調整
               >
                 <Picker.Item label="停止中" value="stop" />
                 <Picker.Item label="受付中" value="avairable" />
