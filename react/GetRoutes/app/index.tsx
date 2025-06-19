@@ -5,6 +5,28 @@ import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import { useLocationSender } from '../hooks/useLocationSender';
 import { Picker } from '@react-native-picker/picker';
+import { Amplify } from 'aws-amplify';
+import Auth from '@aws-amplify/auth';
+import awsconfig from './src/awsconfig';
+
+
+const signIn = async (username: string, password: string) => {
+  try {
+    const user = await Auth.signIn(username, password);
+    console.log('ログイン成功', user);
+  } catch (err) {
+    console.error('ログイン失敗', err);
+  }
+};
+
+
+Amplify.configure({
+  Auth: {
+    region: awsconfig.Auth.region,
+    userPoolId: awsconfig.Auth.userPoolId,
+    userPoolWebClientId: awsconfig.Auth.userPoolWebClientId,
+  },
+});
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
