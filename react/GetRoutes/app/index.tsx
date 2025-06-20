@@ -5,10 +5,10 @@ import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import { useLocationSender } from '../hooks/useLocationSender';
 import { Picker } from '@react-native-picker/picker';
-import { Amplify } from 'aws-amplify';
-import Auth from '@aws-amplify/auth';
+import { Amplify, Auth } from 'aws-amplify';
 import awsconfig from './src/awsconfig';
 
+Amplify.configure(awsconfig);
 
 const signIn = async (username: string, password: string) => {
   try {
@@ -25,6 +25,7 @@ Amplify.configure({
     region: awsconfig.Auth.region,
     userPoolId: awsconfig.Auth.userPoolId,
     userPoolWebClientId: awsconfig.Auth.userPoolWebClientId,
+    oauth: {},
   },
 });
 
