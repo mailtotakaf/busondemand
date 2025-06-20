@@ -1,3 +1,4 @@
+import 'react-native-get-random-values';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform, Button, Linking, FlatList, SafeAreaView, Alert } from 'react-native'; // Alert をインポート
 import Constants from 'expo-constants';
@@ -6,28 +7,15 @@ import { useRouter } from 'expo-router';
 import { useLocationSender } from '../hooks/useLocationSender';
 import { Picker } from '@react-native-picker/picker';
 import { Amplify, Auth } from 'aws-amplify';
+// import Amplify, { Auth } from 'aws-amplify';
 import awsconfig from './src/awsconfig';
 
+// ❗ ここ一度だけ
 Amplify.configure(awsconfig);
 
-const signIn = async (username: string, password: string) => {
-  try {
-    const user = await Auth.signIn(username, password);
-    console.log('ログイン成功', user);
-  } catch (err) {
-    console.error('ログイン失敗', err);
-  }
-};
-
-
-Amplify.configure({
-  Auth: {
-    region: awsconfig.Auth.region,
-    userPoolId: awsconfig.Auth.userPoolId,
-    userPoolWebClientId: awsconfig.Auth.userPoolWebClientId,
-    oauth: {},
-  },
-});
+// import App from './App';
+// import { registerRootComponent } from 'expo';
+// registerRootComponent(App);
 
 const { POST_BUS_LOCATIONS_API_URL } = Constants.expoConfig?.extra || {};
 
