@@ -6,8 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import { useLocationSender } from '../hooks/useLocationSender';
 import { Picker } from '@react-native-picker/picker';
-import { Amplify, Auth } from 'aws-amplify';
-// import Amplify, { Auth } from 'aws-amplify';
+import Amplify, { Auth } from 'aws-amplify';
 import awsconfig from './src/awsconfig';
 
 // ❗ ここ一度だけ
