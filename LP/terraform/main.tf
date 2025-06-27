@@ -113,6 +113,12 @@ resource "aws_apigatewayv2_route" "post_route" {
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
+resource "aws_apigatewayv2_route" "options_route" {
+  api_id    = aws_apigatewayv2_api.contact_api.id
+  route_key = "OPTIONS /contact"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
 resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.contact_api.id
   name        = "$default"
@@ -125,4 +131,8 @@ resource "aws_lambda_permission" "apigw" {
   function_name = aws_lambda_function.contact.arn
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.contact_api.execution_arn}/*/*"
+}
+
+resource "aws_ses_email_identity" "sender" {
+  email = var.source_email
 }
