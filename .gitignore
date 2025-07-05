@@ -32,3 +32,5 @@ lambda/bus_locations/select_pu_bus/python/*
 !lambda/bus_locations/select_pu_bus/python/douglas_peucker.py
 
 .vscode/
+
+react/*
