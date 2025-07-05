@@ -1,66 +1,27 @@
-import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
+import Geolocation from '@react-native-community/geolocation';
 
 export function useLocationSender(
-  busId,
-  apiUrl,
-  autoStart,
-  status,
-  time,
-  quarter
+  busId: string,
+  apiUrl: string,
+  autoStart: boolean,
+  status: string,
+  time: string,
+  quarter: string
 ) {
   const [isTracking, setIsTracking] = useState(autoStart);
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [location, setLocation] = useState<{ coords: { latitude: number; longitude: number } } | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [lastSentTime, setLastSentTime] = useState<Date | null>(null);
-  const subscriptionRef = useRef<any>(null); // ← Location.LocationSubscription だと remove() の型エラーになる場合があるため any にしておく
+  const watchIdRef = useRef<number | null>(null);
 
   const stopTracking = () => {
-    try {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.remove?.(); // ← optional chaining で安全に呼ぶ
-        subscriptionRef.current = null;
-      }
-    } catch (err) {
-      console.error('位置情報の解除に失敗:', err);
+    if (watchIdRef.current !== null) {
+      Geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
     }
   };
 
-  useEffect(() => {
-    const startTracking = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('位置情報の権限がありません');
-        return;
-      }
-
-      const subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 0,
-        },
-        (loc) => {
-          setLocation(loc);
-          sendLocation(loc.coords);
-        }
-      );
-
-      subscriptionRef.current = subscription;
-    };
-
-    if (isTracking) {
-      startTracking();
-    } else {
-      stopTracking();
-    }
-
-    return () => {
-      stopTracking(); // ← アンマウント時も安全に解除
-    };
-  }, [isTracking]);
-
-  // untilを生成
   const getUntil = () => {
     if (!time || !quarter) return '';
     const [h, m] = time.split(':').map(Number);
@@ -68,7 +29,7 @@ export function useLocationSender(
     return `${String(h).padStart(2, '0')}:${untilMinute}`;
   };
 
-  const sendLocation = async (coords) => {
+  const sendLocation = async (coords: { latitude: number; longitude: number }) => {
     try {
       await fetch(apiUrl, {
         method: 'POST',
@@ -78,7 +39,7 @@ export function useLocationSender(
           latitude: coords.latitude,
           longitude: coords.longitude,
           status,
-          until: getUntil(), // ← ここだけ送信
+          until: getUntil(),
         }),
       });
       setLastSentTime(new Date());
@@ -87,6 +48,33 @@ export function useLocationSender(
     }
   };
 
+  useEffect(() => {
+    if (isTracking) {
+      watchIdRef.current = Geolocation.watchPosition(
+        (pos) => {
+          setLocation(pos);
+          sendLocation(pos.coords);
+        },
+        (error) => {
+          console.error('位置情報取得エラー:', error);
+          setErrorMsg(error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          distanceFilter: 0,
+          interval: 5000,
+          fastestInterval: 2000,
+        }
+      );
+    } else {
+      stopTracking();
+    }
+
+    return () => {
+      stopTracking();
+    };
+  }, [isTracking]);
+
   return {
     isTracking,
     setIsTracking,
@@ -94,4 +82,4 @@ export function useLocationSender(
     lastSentTime,
     errorMsg,
   };
-};
+}

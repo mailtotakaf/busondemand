@@ -1,39 +1,95 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# Node modules
 node_modules/
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# Metro bundler cache
+.metro-cache/
 
-# Metro
-.metro-health-check*
+# React Native packager cache
+packager-cache-*
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
+# Babel cache
+babel.config.js.cache
+*.babel.js
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+*.keystore
+
+# iOS
+ios/build/
+ios/Pods/
+ios/Podfile.lock
+ios/DerivedData/
+ios/*.xcodeproj/project.xcworkspace/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcworkspace/xcuserdata/
+
+# Xcode
+*.xcuserstate
+*.xcuserdata
+*.xcworkspace
 
 # macOS
 .DS_Store
-*.pem
 
-# local env files
-.env*.local
+# VSCode
+.vscode/
 
-# typescript
+# Env
+.env
+.env.*
+
+# TypeScript
 *.tsbuildinfo
 
-app-example
+# Watchman
+.watchmanconfig
+
+# JetBrains IDEs (WebStorm, IntelliJ, etc.)
+.idea/
+
+# Other
+tmp/
+temp/
+*.tmp
+.expo/
+
+##
+# Android build artifacts
+/android/.gradle/
+/android/app/build/
+/android/build/
+/android/.cxx/
+/android/local.properties
+*.iml
+
+# Gradle
+.gradle/
+/build/
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# Env
+.env
+
+# Android SDK path
+android/local.properties
+
+# Native build artifacts
+android/app/.cxx/
