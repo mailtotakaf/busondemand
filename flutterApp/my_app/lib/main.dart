@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
 import 'screens/signup_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'bus on demand',
-      home: LoginScreen(),
+      home: HomeScreen(),
       routes: {
         '/signup': (context) => SignUpScreen(),
       },
