@@ -107,6 +107,7 @@ const App = () => {
         `https://hgbu7mkzsk.execute-api.us-west-2.amazonaws.com/bus?busId=${busId}`
       );
       const json = await response.json();
+      console.log('Lambdaからのデータ:', json);
       setData(json);
     } catch (error) {
       console.error('データ取得エラー:', error);
@@ -115,17 +116,17 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = await AsyncStorage.getItem('idToken');
-      setIdToken(token);
-      if (!token) {
-        Alert.alert('未ログインです', 'ログイン画面に遷移してください。');
-      }
-    };
-    checkAuth();
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     const token = await AsyncStorage.getItem('idToken');
+  //     setIdToken(token);
+  //     if (!token) {
+  //       Alert.alert('未ログインです', 'ログイン画面に遷移してください。');
+  //     }
+  //   };
+  //   checkAuth();
+  //   fetchData();
+  // }, []);
 
   const renderItem = ({ item }: { item: RouteItem }) => (
     <View style={styles.item}>
@@ -137,13 +138,13 @@ const App = () => {
     </View>
   );
 
-  if (!idToken) {
-    return (
-      <View style={styles.container}>
-        <Text>認証確認中...</Text>
-      </View>
-    );
-  }
+  // if (!idToken) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text>認証確認中...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <SafeAreaView style={styles.container}>
