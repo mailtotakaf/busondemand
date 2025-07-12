@@ -11,3 +11,8 @@ Low cost opperation by AWS serverless services.
 ```terraform
 terraform apply
 ```
+
+TODO: 
+・時間を5分刻みにするcontribute
+・LangChainで要望を集める
+
